@@ -22,8 +22,11 @@ backends:
             - fedora-34-64:
             - arch-linux-64:
             - amazon-linux-2-64:
+                storage: preserve-size
             - centos-7-64:
+                storage: preserve-size
             - centos-8-64:
+                storage: preserve-size
             - opensuse-15.3-64:
 
 path: /root/snapd-testing-tools
