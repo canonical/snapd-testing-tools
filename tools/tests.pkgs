@@ -58,6 +58,7 @@ remap_many() {
 }
 
 import_backend() {
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
     case "$1" in
         ubuntu-core-*)
             echo "tests.pkgs: Ubuntu Core is not supported" >&2
@@ -65,19 +66,19 @@ import_backend() {
             ;;
         ubuntu-*|debian-*)
             #shellcheck source=tools/tests.pkgs.apt.sh
-            . "$PROJECT_PATH/tools/tests.pkgs.apt.sh"
+            . "$SCRIPT_DIR/tests.pkgs.apt.sh"
             ;;
         fedora-*|centos-*|redhat-*|amazon-*)
             #shellcheck source=tools/tests.pkgs.dnf-yum.sh
-            . "$PROJECT_PATH/tools/tests.pkgs.dnf-yum.sh"
+            . "$SCRIPT_DIR/tests.pkgs.dnf-yum.sh"
             ;;
         opensuse-*)
             #shellcheck source=tools/tests.pkgs.zypper.sh
-            . "$PROJECT_PATH/tools/tests.pkgs.zypper.sh"
+            . "$SCRIPT_DIR/tests.pkgs.zypper.sh"
             ;;
         arch-*)
             #shellcheck source=tools/tests.pkgs.pacman.sh
-            . "$PROJECT_PATH/tools/tests.pkgs.pacman.sh"
+            . "$SCRIPT_DIR/tests.pkgs.pacman.sh"
             ;;
         *)
             echo "tests.pkgs: cannot import packaging backend $1" >&2
