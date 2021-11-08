@@ -4,8 +4,8 @@ summary: test for the log analyzer tool
 systems: [ubuntu-18.04-64, ubuntu-20.04-64]
 
 execute: |
-    log-parser --help | grep -qE 'usage: log-parser \[-h\] \[-c CUT\]'
-    log-parser -h | grep -qE 'usage: log-parser \[-h\] \[-c CUT\]'
+    log-parser --help | MATCH 'usage: log-parser \[-h\] \[-c CUT\]'
+    log-parser -h | MATCH 'usage: log-parser \[-h\] \[-c CUT\]'
     
     # Check results when the log just contains successful tests
     log-parser all-successful.log.spread
