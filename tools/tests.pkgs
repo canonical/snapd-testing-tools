@@ -71,26 +71,26 @@ import_backend() {
             ;;
         ubuntu-*|debian-*)
             # Disabled because when the project is imported as a submodule the
-            # source is not found failing with SC1091
-            #shellcheck disable=SC1091
+            # source is not found failing with SC1090 and SC1091
+            #shellcheck disable=SC1090,SC1091
             . "$TOOLS_DIR/tests.pkgs.apt.sh"
             ;;
         fedora-*|centos-*|redhat-*|amazon-*)
             # Disabled because when the project is imported as a submodule the
-            # source is not found failing with SC1091
-            #shellcheck disable=SC1091
+            # source is not found failing with SC1090 and SC1091
+            #shellcheck disable=SC1090,SC1091
             . "$TOOLS_DIR/tests.pkgs.dnf-yum.sh"
             ;;
         opensuse-*)
             # Disabled because when the project is imported as a submodule the
-            # source is not found failing with SC1091
-            #shellcheck disable=SC1091
+            # source is not found failing with SC1090 and SC1091
+            #shellcheck disable=SC1090,SC1091
             . "$TOOLS_DIR/tests.pkgs.zypper.sh"
             ;;
         arch-*)
             # Disabled because when the project is imported as a submodule the
-            # source is not found failing with SC1091
-            #shellcheck disable=SC1091
+            # source is not found failing with SC1090 and SC1091
+            #shellcheck disable=SC1090,SC1091
             . "$TOOLS_DIR/tests.pkgs.pacman.sh"
             ;;
         *)
