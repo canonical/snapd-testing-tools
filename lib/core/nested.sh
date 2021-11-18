@@ -75,7 +75,7 @@ start_nested_core_vm_unit(){
     # copy the image file to create a new one to use
     # TODO: maybe create a snapshot qcow image instead?
     mkdir -p "${WORK_DIR}"
-    cp /home/core-initrd/pc.img "${IMAGE_FILE}"
+    cp "${SETUPDIR}/pc.img" "${IMAGE_FILE}"
 
     # use only 2G of RAM for qemu-nested
     if [ "${SPREAD_BACKEND}" = "google-nested" ]; then
