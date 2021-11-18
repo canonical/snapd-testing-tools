@@ -46,6 +46,19 @@ wait_for_ssh(){
     done
 }
 
+nested_wait_for_snap_command(){
+  retry=400
+  wait=1
+  while ! execute_remote command -v snap; do
+      retry=$(( retry - 1 ))
+      if [ $retry -le 0 ]; then
+          echo "Timed out waiting for snap command to be available. Aborting!"
+          exit 1
+      fi
+      sleep "$wait"
+  done
+}
+
 cleanup_nested_core_vm(){
     # stop the VM if it is running
     systemctl stop nested-vm-*
