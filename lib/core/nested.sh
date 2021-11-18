@@ -113,28 +113,19 @@ start_nested_core_vm_unit(){
         PARAM_SMP="-smp 1"
     fi
 
-    # with qemu-nested, we can't use kvm acceleration
-    if [ "${SPREAD_BACKEND}" = "google-nested" ]; then
-        PARAM_MACHINE="-machine ubuntu${ATTR_KVM}"
-    elif [ "${SPREAD_BACKEND}" = "lxd-nested" ]; then
-        PARAM_MACHINE="-machine ubuntu${ATTR_KVM}"
-    elif [ "${SPREAD_BACKEND}" = "qemu-nested" ]; then
-        PARAM_MACHINE=""
-    else
-        echo "unknown spread backend ${SPREAD_BACKEND}"
-        exit 1
-    fi
-
     # TODO: enable ms key booting for i.e. nightly edge jobs ?
-    OVMF_VARS="snakeoil"
     OVMF_CODE=""
+    OVMF_VARS=""
     if [ "${ENABLE_SECURE_BOOT:-false}" = "true" ]; then
         OVMF_CODE=".secboot"
     fi
+    if [ "${ENABLE_OVMF_SNAKEOIL:-false}" = "true" ]; then
+        OVMF_VARS=".snakeoil"
+    fi
 
     mkdir -p "${WORK_DIR}/image/"
-    cp -f "/usr/share/OVMF/OVMF_VARS.${OVMF_VARS}.fd" "${WORK_DIR}/image/OVMF_VARS.${OVMF_VARS}.fd"
-    PARAM_BIOS="-drive file=/usr/share/OVMF/OVMF_CODE${OVMF_CODE}.fd,if=pflash,format=raw,unit=0,readonly -drive file=${WORK_DIR}/image/OVMF_VARS.${OVMF_VARS}.fd,if=pflash,format=raw"
+    cp -f "/usr/share/OVMF/OVMF_VARS${OVMF_VARS}.fd" "${WORK_DIR}/image/OVMF_VARS${OVMF_VARS}.fd"
+    PARAM_BIOS="-drive file=/usr/share/OVMF/OVMF_CODE${OVMF_CODE}.fd,if=pflash,format=raw,unit=0,readonly -drive file=${WORK_DIR}/image/OVMF_VARS${OVMF_VARS}.fd,if=pflash,format=raw"
     PARAM_MACHINE="-machine q35${ATTR_KVM} -global ICH9-LPC.disable_s3=1"
 
     if [ "${ENABLE_TPM:-false}" = "true" ]; then
