@@ -50,7 +50,7 @@ cleanup_nested_core_vm(){
     # stop the VM if it is running
     systemctl stop nested-vm-*
 
-    if [ "${ENABLE_TPM}" = "true" ]; then
+    if [ "${ENABLE_TPM:-false}" = "true" ]; then
         if [ -d "/tmp/qtpm" ]; then
             rm -rf /tmp/qtpm
         fi
@@ -128,7 +128,7 @@ start_nested_core_vm_unit(){
     # TODO: enable ms key booting for i.e. nightly edge jobs ?
     OVMF_VARS="snakeoil"
     OVMF_CODE=""
-    if [ "${ENABLE_SECURE_BOOT}" = "true" ]; then
+    if [ "${ENABLE_SECURE_BOOT:-false}" = "true" ]; then
         OVMF_CODE=".secboot"
     fi
 
@@ -137,7 +137,7 @@ start_nested_core_vm_unit(){
     PARAM_BIOS="-drive file=/usr/share/OVMF/OVMF_CODE${OVMF_CODE}.fd,if=pflash,format=raw,unit=0,readonly -drive file=${WORK_DIR}/image/OVMF_VARS.${OVMF_VARS}.fd,if=pflash,format=raw"
     PARAM_MACHINE="-machine q35${ATTR_KVM} -global ICH9-LPC.disable_s3=1"
 
-    if [ "${ENABLE_TPM}" = "true" ]; then
+    if [ "${ENABLE_TPM:-false}" = "true" ]; then
         TPMSOCK_PATH="/var/snap/swtpm-mvo/current/swtpm-sock"
         if [ "${SPREAD_BACKEND}" = "lxd-nested" ]; then
             mkdir -p /tmp/qtpm
