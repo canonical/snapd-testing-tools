@@ -39,11 +39,11 @@ The tools included in this project are intended to be reused by other projects.
 
 Read the following considerations before adding new tools:
 
- - Each tool has to be stored in the tools directory
+ - Each tool needs to be accompanied by at least 1 spread test in `tests/<tool-name>/`
  - At least 1 spread test needs to be included in the tests directory for each tool
- - In case the tool is a shell script, this needs to pass the shellcheck
- - The tools need to be as generic as possible
- - A command line interface (CLI) has to be provided by the tool. including a help
+ - If the tool is a shell script, it needs to first pass a [ShellCheck](https://github.com/koalaman/shellcheck) assessment
+ - All tools need to be as generic as possible
+ - Each tool must also provide a command line interface (CLI), including _help_ output
 
 
 ## Project status
