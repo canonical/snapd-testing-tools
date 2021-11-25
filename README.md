@@ -33,6 +33,19 @@ chat in realtime with the snapd team and our wider community on the
 For news and updates, follow us on [Twitter](https://twitter.com/snapcraftio)
 and on [Facebook](https://www.facebook.com/snapcraftio).
 
+## Adding new tools
+
+The tools included in this project are intended to be reused by other projects.
+
+Read the following considerations before adding new tools:
+
+ - Each tool has to be stored in the tools directory
+ - At least 1 spread test needs to be included in the tests directory for each tool
+ - In case the tool is a shell script, this needs to pass the shellcheck
+ - The tools need to be as generic as possible
+ - A command line interface (CLI) has to be provided by the tool. including a help
+
+
 ## Project status
 
 | Service | Status |
