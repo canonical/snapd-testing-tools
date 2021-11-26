@@ -9,19 +9,20 @@ if [[ -n "$D" ]]; then
     set -x
 fi
 
-##HELP: Usage: repack-kernel <command> <opts>
-##HELP:
-##HELP: Handle extraction of the kernel snap to a workspace directory, and later
-##HELP: repacking it back to a snap.
-##HELP:
-##HELP: Commands:
-##HELP:    setup                          - setup system dependencies
-##HELP:    extract <snap-file> <target>   - extract under <target> workspace tree
-##HELP:    prepare <target>               - prepare initramfs & kernel for repacking
-##HELP:    pack <target>                  - pack the kernel
-##HELP:    cull-firmware <target>         - remove unnecessary firmware
-##HELP:    cull-modules                   - remove unnecessary mofules
-##HELP:
+show_help() {
+    echo "usage: repack-kernel <command> <opts>"
+    echo ""
+    echo "handle extraction of the kernel snap to a workspace directory, and later"
+    echo "repacking it back to a snap."
+    echo ""
+    echo "   setup                          - setup system dependencies"
+    echo "   extract <snap-file> <target>   - extract under <target> workspace tree"
+    echo "   prepare <target>               - prepare initramfs & kernel for repacking"
+    echo "   pack <target>                  - pack the kernel"
+    echo "   cull-firmware <target>         - remove unnecessary firmware"
+    echo "   cull-modules <target>          - remove unnecessary modules"
+    echo ""
+}
 
 setup_deps() {
     if [[ "$UID" != "0" ]]; then
@@ -31,6 +32,7 @@ setup_deps() {
 
     # carries ubuntu-core-initframfs
     add-apt-repository ppa:snappy-dev/image -y
+    apt update -y
     apt install ubuntu-core-initramfs -y
 }
 
@@ -199,36 +201,35 @@ pack() {
     snap pack "${@:2}" "$target/kernel" 
 }
 
-show_help() {
-    grep '^##HELP:' "$0" | sed -e 's/##HELP: \?//'
+main() {
+    opt="$1"
+    shift || true
+
+    if [[ -z "$opt" ]] || [[ "$opt" == "--help" ]]; then
+        show_help
+        exit 1
+    fi
+
+    case "$opt" in
+        setup)
+            setup_deps
+            ;;
+        extract)
+            extract_kernel "$@"
+            ;;
+        prepare)
+            prepare_kernel "$@"
+            ;;
+        cull-modules)
+            cull_modules "$@"
+            ;;
+        cull-firmware)
+            cull_firmware "$@"
+            ;;
+        pack)
+            pack "$@"
+            ;;
+    esac
 }
 
-
-opt="$1"
-shift || true
-
-if [[ -z "$opt" ]] || [[ "$opt" == "--help" ]]; then
-    show_help
-    exit 1
-fi
-
-case "$opt" in
-    setup)
-        setup_deps
-        ;;
-    extract)
-        extract_kernel "$@"
-        ;;
-    prepare)
-        prepare_kernel "$@"
-        ;;
-    cull-modules)
-        cull_modules "$@"
-        ;;
-    cull-firmware)
-        cull_firmware "$@"
-        ;;
-    pack)
-        pack "$@"
-        ;;
-esac
+main "$@"
