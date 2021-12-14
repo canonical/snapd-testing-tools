@@ -20,7 +20,7 @@ show_help() {
     echo ""
 }
 
-setup_deps() {
+setup() {
     if [ "$UID" != "0" ]; then
         echo "run as root (only this command)"
         exit 1
@@ -29,7 +29,11 @@ setup_deps() {
     # carries ubuntu-core-initframfs
     add-apt-repository ppa:snappy-dev/image -y
     apt update -y
-    apt install ubuntu-core-initramfs -y
+    
+    if ![ apt install ubuntu-core-initramfs -y ]; then
+        echo "ubuntu-core-initramfs was not available in deb repository!"
+        exit 1
+    fi
 }
 
 get_kver() {
