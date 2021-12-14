@@ -98,7 +98,7 @@ extract() {
 
 }
 
-prepare_kernel() {
+prepare() {
     local target="$1"
 
     if [ -z "$target" ]; then
@@ -224,7 +224,7 @@ main() {
     done
 
     if [ -z "$(declare -f "$action")" ]; then
-        echo "log.analyzer: no such command: $subcommand" >&2
+        echo "repack-kernel: no such command: $subcommand" >&2
         show_help
         exit 1
     fi
