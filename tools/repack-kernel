@@ -30,7 +30,7 @@ setup() {
     add-apt-repository ppa:snappy-dev/image -y
     apt update -y
     
-    if ![ apt install ubuntu-core-initramfs -y ]; then
+    if ! apt install ubuntu-core-initramfs -y; then
         echo "ubuntu-core-initramfs was not available in deb repository!"
         exit 1
     fi
