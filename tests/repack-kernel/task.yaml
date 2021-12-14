@@ -16,11 +16,11 @@ execute: |
 
     # extract the kernel snap, including extracting the initrd from the kernel.efi
     kerneldir=/tmp/kernel-workdir
-    repack-kernel extract upstream-pc-kernel.snap $kerneldir
+    repack-kernel extract "upstream-pc-kernel.snap" "$kerneldir"
 
     # repack the initrd into the kernel.efi
-    repack-kernel prepare $kerneldir
+    repack-kernel prepare "$kerneldir"
 
     # repack the kernel snap itself
-    repack-kernel pack $kerneldir --filename=pc-kernel.snap
-    rm -rf $kerneldir
+    repack-kernel pack "$kerneldir" --filename=pc-kernel.snap
+    rm -rf "$kerneldir"
