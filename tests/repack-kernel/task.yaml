@@ -16,6 +16,13 @@ execute: |
     # verify error when calling without an invalid commnnd
     test "$(repack-kernel invalid-command 2>&1 | grep -c "no such command: invalid-command")" -eq 1
 
+    # verify that an error is thrown when calling commands without arguments
+    test "$(repack-kernel extract 2>&1 | grep -c "invalid arguments for extract")" -eq 1
+    test "$(repack-kernel extract "upstream-pc-kernel.snap" 2>&1 | grep -c "invalid arguments for extract")" -eq 1
+    test "$(repack-kernel prepare 2>&1 | grep -c "missing target for prepare")" -eq 1
+    test "$(repack-kernel cull-modules 2>&1 | grep -c "missing target for cull-modules")" -eq 1
+    test "$(repack-kernel cull-firmware 2>&1 | grep -c "missing target for cull-firmware")" -eq 1
+
     # download the kernel snap
     snap download pc-kernel --channel=20/stable --basename=upstream-pc-kernel
 
@@ -43,4 +50,4 @@ execute: |
     fi
 
 restore: |
-    apt remove snapd
+    apt remove snapd -yqq

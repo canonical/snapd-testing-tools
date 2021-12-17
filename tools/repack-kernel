@@ -52,7 +52,7 @@ extract() {
     local target="$2"
 
     if [ -z "$target" ] || [ -z "$snap_file" ]; then
-        echo "repack-kernel: invalid argument for prepare"
+        echo "repack-kernel: invalid arguments for extract"
         exit 1
     fi
 
@@ -104,7 +104,7 @@ prepare() {
     local target="$1"
 
     if [ -z "$target" ]; then
-        echo "repack-kernel: missing target for repack"
+        echo "repack-kernel: missing target for prepare"
         exit 1
     fi
 
@@ -149,7 +149,7 @@ cull_firmware() {
     local target="$1"
 
     if [ -z "$target" ]; then
-        echo "usage: cull-firmware <extract-tree>"
+        echo "repack-kernel: missing target for cull-firmware"
         exit 1
     fi
     (
