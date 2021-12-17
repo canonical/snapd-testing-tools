@@ -9,9 +9,9 @@ prepare: |
     apt install snapd
 
 execute: |
-    repack-kernel | MATCH 'usage: repack-kernel \[-h\] \[-c CUT\]'
-    repack-kernel -h | MATCH 'usage: repack-kernel \[-h\] \[-c CUT\]'
-    repack-kernel --help | MATCH 'usage: repack-kernel \[-h\] \[-c CUT\]'
+    repack-kernel | MATCH 'usage: repack-kernel <command> <opts>'
+    repack-kernel -h | MATCH 'usage: repack-kernel <command> <opts>'
+    repack-kernel --help | MATCH 'usage: repack-kernel <command> <opts>'
 
     # verify error when calling without an invalid commnnd
     test "$(repack-kernel invalid-command 2>&1 | grep -c "no such command: invalid-command")" -eq 1
