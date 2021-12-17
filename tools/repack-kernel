@@ -30,14 +30,16 @@ setup() {
     add-apt-repository ppa:snappy-dev/image -y
     apt update -y
     
-    if ! apt install ubuntu-core-initramfs -y; then
-        echo "ubuntu-core-initramfs was not available in deb repository!"
-        exit 1
+    if ! dpkg -s ubuntu-core-initramfs >/dev/null 2>&1; then
+        if ! apt install ubuntu-core-initramfs -y; then
+            echo "ubuntu-core-initramfs was not available in deb repository!"
+            exit 1
+        fi
     fi
 }
 
 get_kver() {
-    kerneldir="$1"
+    local kerneldir="$1"
     (
         cd "$kerneldir"
         #shellcheck disable=SC2010
@@ -107,11 +109,11 @@ prepare() {
     fi
 
     target=$(realpath "$target")
-    kver="$(get_kver "$target/kernel")"
+    local kver="$(get_kver "$target/kernel")"
 
     (
         # all the skeleton edits go to a local copy of distro directory
-        skeletondir="$target/skeleton"
+        local skeletondir="$target/skeleton"
 
         cd "$target/work"
         # XXX: need to be careful to build an initrd using the right kernel
@@ -153,8 +155,7 @@ cull_firmware() {
     (
         # XXX: drop ~450MB+ of firmware which should not be needed in under qemu
         # or the cloud system
-        cd "$target/kernel"
-        rm -rf firmware/*
+        rm -rf "$target"/kernel/firmware/*
     )
 }
 
@@ -167,7 +168,7 @@ cull_modules() {
     fi
 
     target="$(realpath $target)"
-    kver="$(get_kver "$target/kernel")"
+    local kver="$(get_kver "$target/kernel")"
 
     (
         cd "$target/kernel"
