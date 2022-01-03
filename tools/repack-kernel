@@ -68,27 +68,21 @@ extract() {
     # repack initrd magic, beware
     # assumptions: initrd is compressed with LZ4, cpio block size 512, microcode
     # at the beginning of initrd image
-    (
-        cd "$target/kernel"
 
-        # XXX: ideally we should unpack the initrd, replace snap-boostrap and
-        # repack it using ubuntu-core-initramfs --skeleton=<unpacked> this does not
-        # work and the rebuilt kernel.efi panics unable to start init, but we
-        # still need the unpacked initrd to get the right kernel modules
-        objcopy -j .initrd -O binary kernel.efi "$target/work/initrd"
+    # XXX: ideally we should unpack the initrd, replace snap-boostrap and
+    # repack it using ubuntu-core-initramfs --skeleton=<unpacked> this does not
+    # work and the rebuilt kernel.efi panics unable to start init, but we
+    # still need the unpacked initrd to get the right kernel modules
+    objcopy -j .initrd -O binary "$target"/kernel/kernel.efi "$target/work/initrd"
 
-        # copy out the kernel image for create-efi command
-        objcopy -j .linux -O binary kernel.efi "$target/work/vmlinuz-$kver"
+    # copy out the kernel image for create-efi command
+    objcopy -j .linux -O binary "$target"/kernel/kernel.efi "$target/work/vmlinuz-$kver"
 
-        cp -a kernel.efi "$target/backup/"
-    )
+    cp -a "$target"/kernel/kernel.efi "$target/backup/"
 
-    (
-        cd "$target/work"
-        # this works on 20.04 but not on 18.04
-        unmkinitramfs initrd unpacked-initrd
-    )
-
+    # this works on 20.04 but not on 18.04
+    unmkinitramfs "$target"/work/initrd "$target"/work/unpacked-initrd
+    
     # copy the unpacked initrd to use as the target skeleton
     cp -ar "$target/work/unpacked-initrd" "$target/skeleton"
 
@@ -234,3 +228,4 @@ main() {
 }
 
 main "$@"
+
