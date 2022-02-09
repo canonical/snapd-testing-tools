@@ -2,7 +2,7 @@
 
 show_help() {
     echo "usage: os.query is-core, is-classic"
-    echo "       os.query is-core16, is-core18, is-core20"
+    echo "       os.query is-core16, is-core18, is-core20, is-core22"
     echo "       os.query is-trusty, is-xenial, is-bionic, is-focal, is-impish"
     echo "       os.query is-ubuntu, is-debian, is-fedora, is-amazon-linux, is-arch-linux, is-centos, is-centos-7, is-centos-8, is-opensuse"
     echo "       os.query is-opensuse-tumbleweed, is-debian-sid, is-debian-11, is-debian-10"
@@ -25,6 +25,10 @@ is_core18() {
 
 is_core20() {
     [[ "$SPREAD_SYSTEM" == ubuntu-core-20-* ]]
+}
+
+is_core22() {
+    [[ "$SPREAD_SYSTEM" == ubuntu-core-22-* ]]
 }
 
 is_classic() {
