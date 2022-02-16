@@ -99,7 +99,9 @@ prepare() {
     fi
 
     target=$(realpath "$target")
-    local kver="$(get_kver "$target/kernel")"
+    
+    local kver
+    kver="$(get_kver "$target/kernel")"
 
     (
         # all the skeleton edits go to a local copy of distro directory
@@ -156,8 +158,10 @@ cull_modules() {
         exit 1
     fi
 
-    target="$(realpath $target)"
-    local kver="$(get_kver "$target/kernel")"
+    target=$(realpath "$target")
+    
+    local kver
+    kver="$(get_kver "$target/kernel")"
 
     (
         cd "$target/kernel"
