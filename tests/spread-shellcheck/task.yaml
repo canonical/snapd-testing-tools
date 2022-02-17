@@ -1,6 +1,6 @@
 summary: smoke test for the spread-shellcheck tool
 
-systems: [ ubuntu-16.04-64, ubuntu-20.04-64 ]
+systems: [ ubuntu-20.04-64 ]
 
 prepare: |
     snap install shellcheck
