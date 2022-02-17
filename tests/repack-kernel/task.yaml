@@ -47,7 +47,7 @@ execute: |
     repack-kernel pack "$kerneldir" --filename=pc-kernel.snap
     rm -rf "$kerneldir"
 
-    if ![ -f "pc-kernel.snap" ]; then
+    if ! [ -f "pc-kernel.snap" ]; then
         echo "Repack failed, pc-kernel.snap was not created"
         exit 1
     fi
