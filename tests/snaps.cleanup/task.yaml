@@ -1,12 +1,14 @@
 summary: smoke test for the snaps.cleanup tool
 
+systems: [ubuntu-18.04-64, ubuntu-20.04-64, ubuntu-22.04-64]
+
 execute: |
     snaps.cleanup --help | MATCH 'usage: snaps.cleanup [--skip <SNAP_NAME>]'
     snaps.cleanup -h | MATCH 'usage: snaps.cleanup [--skip <SNAP_NAME>]'
 
     # Start with a clean list of snaps
     snap wait system seed.loaded
-    for i in $(seq 30); do
+    for _ in $(seq 30); do
         if snap changes | MATCH ".*Doing.*Auto-refresh.*"; then
             sleep 1
         else
