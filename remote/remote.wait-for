@@ -1,0 +1,289 @@
+#!/bin/bash -e
+
+CFG_FILE=tests.remote.cfg
+
+show_help() {
+    echo "usage: wait-for <EVENT>"
+    echo ""
+    echo "Available options:"
+    echo "  -h --help   show this help message."
+    echo ""
+    echo "EVENT:"
+    echo "  ssh: it is possible to ssh to the vm"
+    echo "  no-ssh: is not possible to ssh to the vm"
+    echo "  snap-command: snap command is available in the vm"
+    echo "  reboot: reboot is done in the vm"
+    echo "  device-initialized: the device is initialized and has a serial"
+    echo ""
+}
+
+setup() {
+    host=
+    port=
+    user=
+    pwd=
+    cert=
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit
+                ;;
+            --host)
+                host="$2"
+                shift 2
+                ;;
+            --port)
+                port="$2"
+                shift 2
+                ;;
+            --user)
+                user="$2"
+                shift 2
+                ;;
+            --pass)
+                pass="$2"
+                shift 2
+                ;;
+            --cert)
+                cert="$2"
+                shift 2
+                ;;
+            *)
+                echo "tests.remote: unknown option $1" >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    if [ -z "$host" || -z "$port" ] || -z "$user" ]; then
+        echo "tests.remote: host, port and user values are required"
+    fi
+    if [ -n "$pass" ] && [ -z "$(command -v sshpass)" ]; then
+        echo "tests.remote: sshpass tool is required when password is configured"
+    fi
+    if [ -n "$cert" ] && ! [ -f "$cert" ]; then
+        echo "tests.remote: certificate is set but file does not exist"
+    fi
+
+    rm -f "$CFG_FILE"
+    echo "export TESTS_REMOTE_HOST=$host" > "$CFG_FILE"
+    echo "export TESTS_REMOTE_PORT=$port" >> "$CFG_FILE"
+    echo "export TESTS_REMOTE_USER=$user" >> "$CFG_FILE"
+    echo "export TESTS_REMOTE_PASS=$pass" >> "$CFG_FILE"
+    echo "export TESTS_REMOTE_CERT=$cert" >> "$CFG_FILE"
+}
+
+_load_config() {
+    if [ ! -f "$CFG_FILE" ]; then
+        echo "tests.remote: config file \"$CFG_FILE\" not found, please run setup first"
+        return 0
+    fi
+    . "$CFG_FILE"
+}
+
+_get_pass() {
+    SSH_PASS=""
+    if [ -n "$TESTS_REMOTE_PASS" ]; then
+        echo "sshpass -p $TESTS_REMOTE_PASS"
+    fi
+}
+
+_get_cert() {
+    if [ -n "$TESTS_REMOTE_PASS" ]; then
+        return
+    elif [ -n "$TESTS_REMOTE_CERT" ]; then
+        echo "-i $TESTS_REMOTE_CERT"
+    fi
+}
+
+exec() {
+    SSH_PASS="$(_get_pass)"
+    SSH_CERT="$(_get_cert)"
+    "$SSH_PASS" ssh "$SSH_CERT" -p "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
+}
+
+push() {
+    LOCAL_PATH=$1
+    REMOTE_PATH=$2
+    if [ -z "$LOCAL_PATH" ] || [ -z "$REMOTE_PATH" ]; then
+        echo "tests.remote: local and remote paths are required"
+    fi
+
+    SSH_PASS="$(_get_pass)"
+    SSH_CERT="$(_get_cert)"
+
+    "$SSH_PASS" scp "$SSH_CERT" -P "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$1" "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST":"$2"
+}
+
+pull() {
+    REMOTE_PATH=$1
+    LOCAL_PATH=$2
+    if [ -z "$LOCAL_PATH" ] || [ -z "$REMOTE_PATH" ]; then
+        echo "tests.remote: local and remote paths are required"
+    fi
+
+    SSH_PASS="$(_get_pass)"
+    SSH_CERT="$(_get_cert)"
+
+    "$SSH_PASS" scp "$SSH_CERT" -P "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST":"$1" "$2"
+}
+
+_wait_for_ssh() {
+    # TODO:UC20: the retry count should be lowered to something more reasonable.
+    local retry=800
+    local wait=1
+
+    until exec "true"; do
+        retry=$(( retry - 1 ))
+        if [ $retry -le 0 ]; then
+            echo "Timed out waiting for command 'true' to succeed. Aborting!"
+            return 1
+        fi
+        sleep "$wait"
+    done
+}
+
+_wait_for_no_ssh() {
+    local retry=200
+    local wait=1
+
+    while exec "true"; do
+        retry=$(( retry - 1 ))
+        if [ $retry -le 0 ]; then
+            echo "Timed out waiting for command 'true' to fail. Aborting!"
+            return 1
+        fi
+        sleep "$wait"
+    done
+}
+
+_wait_for_snap_command() {
+    # In this function the remote retry command cannot be used because it could
+    # be executed before the tool is deployed.
+    local retry=200
+    local wait=1
+
+    while ! exec "command -v snap"; do
+        retry=$(( retry - 1 ))
+        if [ $retry -le 0 ]; then
+            echo "Timed out waiting for command 'command -v snap' to success. Aborting!"
+            return 1
+        fi
+        sleep "$wait"
+    done
+}
+
+get_boot_id() {
+    nested_exec "cat /proc/sys/kernel/random/boot_id"
+}
+
+wait_for_reboot() {
+    local initial_boot_id="$1"
+    local last_boot_id="$initial_boot_id"
+    local retry=150
+    local wait=5
+
+    while [ $retry -ge 0 ]; do
+        retry=$(( retry - 1 ))
+        # The get_boot_id could fail because the connection is broken due to the reboot
+        last_boot_id="$(get_boot_id)" || true
+        if [[ "$last_boot_id" =~ .*-.*-.*-.*-.* ]] && [ "$last_boot_id" != "$initial_boot_id" ]; then
+            break
+        fi
+        sleep "$wait"
+    done
+
+    [ "$last_boot_id" != "$initial_boot_id" ]
+}
+
+nested_wait_for_device_initialized_change() {
+    local retry=60
+    local wait=1
+
+    while ! nested_exec "snap changes" | MATCH "Done.*Initialize device"; do
+        retry=$(( retry - 1 ))
+        if [ $retry -le 0 ]; then
+            echo "Timed out waiting for device to be fully initialized. Aborting!"
+            return 1
+        fi
+        sleep "$wait"
+    done
+}
+
+wait_for() {
+    if [ $# -eq 0 ]; then
+        show_help
+        exit 1
+    fi
+    local action=
+    case "$1" in
+        ssh)
+            action=wait_for_ssh
+            shift
+            ;;
+        no-ssh)
+            action=wait_for_no_ssh
+            shift
+            ;;
+        snap-command)
+            action=wait_for_snap_command
+            shift
+            ;;
+        reboot)
+            action=wait_for_reboot
+            shift
+            ;;
+        device-initialized)
+            action=wait_for_device_initialized
+            shift
+            ;;
+        *)
+            echo "tests.remote: unsupported parameter $1" >&2
+            exit 1
+            ;;
+    esac
+
+    "$action" "$@"
+}
+
+prepare() {
+}
+
+
+main() {
+    if [ $# -eq 0 ]; then
+        show_help
+        exit 0
+    fi
+
+    local subcommand="$1"
+    local action=
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            *)
+                action=$(echo "$subcommand" | tr '-' '_')
+                shift
+                break
+                ;;
+        esac
+    done
+
+    if [ -z "$(declare -f "$action")" ]; then
+        echo "tests.remote: no such command: $subcommand"
+        show_help
+        exit 1
+    fi
+
+    if [ "$action" != "setup" ]; then
+        _load_config
+    fi
+
+    "$action" "$@"
+}
+
+main "$@"
