@@ -3,7 +3,7 @@
 show_help() {
     echo "usage: snaps.name gadget, kernel, core"
     echo ""
-    echo "Get the name of a specific snap for the current system"
+    echo "get the name of a specific snap for the current system"
 }
 
 gadget_name() {
@@ -15,6 +15,7 @@ kernel_name(){
 }
 
 core_name(){
+    local core_name
     core_name="$(snap model --verbose | grep -Po "^base:\\s+\\K.*" || true)"
     if [ -z "$core_name" ]; then
         core_name="core"
