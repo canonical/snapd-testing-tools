@@ -10,10 +10,15 @@ execute: |
             test "$(os.paths media-dir)" = "/media"
             test "$(os.paths libexec-dir)" = "/usr/lib"
             ;;
-        fedora-*|amazon-*|centos-*|arch-*)
+        fedora-*|amazon-*|centos-*)
             test "$(os.paths snap-mount-dir)" = "/var/lib/snapd/snap"
             test "$(os.paths media-dir)" = "/run/media"
             test "$(os.paths libexec-dir)" = "/usr/libexec"
+            ;;
+        arch-*)
+            test "$(os.paths snap-mount-dir)" = "/var/lib/snapd/snap"
+            test "$(os.paths media-dir)" = "/run/media"
+            test "$(os.paths libexec-dir)" = "/usr/lib"
             ;;
         opensuse-tumbleweed-*)
             test "$(os.paths snap-mount-dir)" = "/snap"
