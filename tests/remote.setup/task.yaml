@@ -8,12 +8,12 @@ execute: |
     remote.setup -h | MATCH 'usage: remote.setup config --host <host> --port <port> --user <USER> \[--pass <PASS>\] \[--cert <CERT>\]'
 
     # Check basic configuration
-    remote.setup config --host localhost --port 22 --user remote-user-1 --pass remote-pass-1
+    remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-pass-1
     . remote.setup.cfg
     test "$TESTS_REMOTE_HOST" = localhost
     test "$TESTS_REMOTE_PORT" = 22
-    test "$TESTS_REMOTE_USER" = remote-user-1
-    test "$TESTS_REMOTE_PASS" = remote-pass-1
+    test "$TESTS_REMOTE_USER" = tools-user-1
+    test "$TESTS_REMOTE_PASS" = tools-pass-1
     test -z "$TESTS_REMOTE_CERT"
 
     # Check get-config-path subcommand
@@ -21,19 +21,19 @@ execute: |
 
     # Check the certificate
     touch my-key
-    remote.setup config --host 127.0.0.1 --port 22 --user remote-user-1 --cert my-key
+    remote.setup config --host 127.0.0.1 --port 22 --user tools-user-1 --cert my-key
     . remote.setup.cfg
     test "$TESTS_REMOTE_HOST" = 127.0.0.1
     test "$TESTS_REMOTE_CERT" = my-key
 
     # Check basic errors
-    remote.setup config --port 22 --user remote-user-1 --pass remote-pass-1 2>&1 | MATCH "remote.setup: host, port and user values are require"
-    remote.setup config --host 127.0.0.1 --user remote-user-1 --pass remote-pass-1 2>&1 | MATCH "remote.setup: host, port and user values are require"
-    remote.setup config --host 127.0.0.1 --port 22 --pass remote-pass-1 2>&1 | MATCH "remote.setup: host, port and user values are require"
+    remote.setup config --port 22 --user tools-user-1 --pass tools-pass-1 2>&1 | MATCH "remote.setup: host, port and user values are require"
+    remote.setup config --host 127.0.0.1 --user tools-user-1 --pass tools-pass-1 2>&1 | MATCH "remote.setup: host, port and user values are require"
+    remote.setup config --host 127.0.0.1 --port 22 --pass tools-pass-1 2>&1 | MATCH "remote.setup: host, port and user values are require"
 
     # Check other errors
-    remote.setup config --host 127.0.0.1 --port 22 --user remote-user-1 --cert my-key-2 2>&1 | MATCH "remote.setup: certificate is set but file does not exist"
-    remote.setup config --host localhost --port 22 --user remote-user-1 --password remote-user-1 2>&1 | MATCH "tests.remote: unknown option --password"
+    remote.setup config --host 127.0.0.1 --port 22 --user tools-user-1 --cert my-key-2 2>&1 | MATCH "remote.setup: certificate is set but file does not exist"
+    remote.setup config --host localhost --port 22 --user tools-user-1 --password tools-user-1 2>&1 | MATCH "tests.remote: unknown option --password"
     if [ -z "$(command -v sshpass)" ]; then
-        remote.setup config --host localhost --port 22 --user remote-user-1 --pass remote-user-1 | MATCH "remote.setup: sshpass tool is required when password is configured"
+        remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-user-1 | MATCH "remote.setup: sshpass tool is required when password is configured"
     fi
