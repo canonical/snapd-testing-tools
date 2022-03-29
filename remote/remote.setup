@@ -54,14 +54,16 @@ config() {
         esac
     done
 
-    if [ -z "$host" || -z "$port" ] || -z "$user" ]; then
+    if [ -z "$host" ] || [ -z "$port" ] || [ -z "$user" ]; then
         echo "remote.setup: host, port and user values are required"
+        exit 1
     fi
     if [ -n "$pass" ] && [ -z "$(command -v sshpass)" ]; then
         echo "remote.setup: sshpass tool is required when password is configured"
     fi
     if [ -n "$cert" ] && ! [ -f "$cert" ]; then
         echo "remote.setup: certificate is set but file does not exist"
+        exit 1
     fi
 
     rm -f "$CFG_FILE"

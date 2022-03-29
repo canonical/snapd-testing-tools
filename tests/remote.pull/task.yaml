@@ -1,0 +1,28 @@
+summary: smoke test for the remote.pull tool
+
+prepare: |
+    tests.pkgs install sshpass
+    useradd -m remote-user-1
+    echo remote-user-1:remote-user-1 | sudo chpasswd
+
+restore: |
+    tests.pkgs remove sshpass
+
+    killall -TERM -u remote-user-1
+    userdel -r remote-user-1
+    rm -f testfile remote.setup.cfg
+
+execute: |
+    remote.pull --help | MATCH 'usage: remote.pull <REMOTE_PATH> <LOCAL_PATH>'
+    remote.pull -h | MATCH 'usage: remote.pull <REMOTE_PATH> <LOCAL_PATH>'
+
+    # check basic pull 
+    remote.setup config --host localhost --port 22 --user remote-user-1 --pass remote-user-1
+    touch /home/remote-user-1/testfile
+    remote.pull /home/remote-user-1/testfile .
+    test -f testfile
+
+    # Check errors
+    remote.pull testfile 2>&1 | MATCH "remote.pull: local and remote paths are required"
+    rm -f remote.setup.cfg
+    remote.pull /home/remote-user-1/testfile . 2>&1 | MATCH "remote.pull: config file \"remote.setup.cfg\" not found, please run remote.setup command first"

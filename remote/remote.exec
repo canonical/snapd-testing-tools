@@ -11,7 +11,7 @@ show_help() {
 _load_config() {
     CFG_FILE="$(remote.setup get-config-path)"
     if [ ! -f "$CFG_FILE" ]; then
-        echo "remote.exec: config file \"$CFG_FILE\" not found, please run remote.setup setup first"
+        echo "remote.exec: config file \"$CFG_FILE\" not found, please run remote.setup command first"
         return 0
     fi
     . "$CFG_FILE"
@@ -49,9 +49,17 @@ remote_exec() {
                 pass="$2"
                 shift 2
                 ;;
+            -*)
+                echo "remote.exec: unknown option $1" >&2
+                exit 1
+                ;;
+            *)
+                break    
+                ;;
         esac
     done
 
+    _load_config
     if [ -n "$user" ]; then
         TESTS_REMOTE_USER="$user"
     fi
@@ -61,11 +69,11 @@ remote_exec() {
 
     SSH_PASS="$(_get_pass)"
     SSH_CERT="$(_get_cert)"
-    "$SSH_PASS" ssh "$SSH_CERT" -p "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
+
+    $SSH_PASS ssh $SSH_CERT -p "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
 }
 
-main() {
-    _load_config
+main() {    
     remote_exec "$@"
 }
 

@@ -11,7 +11,7 @@ show_help() {
 _load_config() {
     CFG_FILE="$(remote.setup get-config-path)"
     if [ ! -f "$CFG_FILE" ]; then
-        echo "remote.push: config file \"$CFG_FILE\" not found, please run remote.setup setup first"
+        echo "remote.push: config file \"$CFG_FILE\" not found, please run remote.setup command first"
         return 0
     fi
     . "$CFG_FILE"
@@ -42,11 +42,11 @@ remote_push() {
     SSH_PASS="$(_get_pass)"
     SSH_CERT="$(_get_cert)"
 
-    "$SSH_PASS" scp "$SSH_CERT" -P "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$1" "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST":"$2"
+    $SSH_PASS scp $SSH_CERT -P "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$1" "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST":"$2"
 }
 
 main() {
-    if [ $# -eq 0 ]; then
+    if [ $# -eq 0 ] || [ "$1" == '-h' ] ||  [ "$1" == '--help' ]; then
         show_help
         exit 0
     fi
