@@ -16,11 +16,7 @@ get_config_path() {
 }
 
 config() {
-    host=
-    port=
-    user=
-    pass=
-    cert=
+    local host port user pass cert
     while [ $# -gt 0 ]; do
         case "$1" in
             -h|--help)

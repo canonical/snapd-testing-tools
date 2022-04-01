@@ -9,6 +9,7 @@ execute: |
 
     # Check basic configuration
     remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-pass-1
+    # shellcheck disable=SC1091
     . remote.setup.cfg
     test "$TESTS_REMOTE_HOST" = localhost
     test "$TESTS_REMOTE_PORT" = 22
@@ -22,6 +23,7 @@ execute: |
     # Check the certificate
     touch my-key
     remote.setup config --host 127.0.0.1 --port 22 --user tools-user-1 --cert my-key
+    # shellcheck disable=SC1091
     . remote.setup.cfg
     test "$TESTS_REMOTE_HOST" = 127.0.0.1
     test "$TESTS_REMOTE_CERT" = my-key

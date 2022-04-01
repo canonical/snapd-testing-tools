@@ -9,6 +9,7 @@ show_help() {
 }
 
 _load_config() {
+    local CFG_FILE
     CFG_FILE="$(remote.setup get-config-path)"
     if [ ! -f "$CFG_FILE" ]; then
         echo "remote.exec: config file \"$CFG_FILE\" not found, please run remote.setup command first"
@@ -18,7 +19,7 @@ _load_config() {
 }
 
 _get_pass() {
-    SSH_PASS=""
+    local SSH_PASS
     if [ -n "$TESTS_REMOTE_PASS" ]; then
         echo "sshpass -p $TESTS_REMOTE_PASS"
     fi
@@ -33,8 +34,7 @@ _get_cert() {
 }
 
 remote_exec() {
-    user=
-    pass=
+    local user pass
     while [ $# -gt 0 ]; do
         case "$1" in
             -h|--help)
@@ -67,6 +67,7 @@ remote_exec() {
         TESTS_REMOTE_PASS="$pass"
     fi
 
+    local SSH_PASS SSH_CERT
     SSH_PASS="$(_get_pass)"
     SSH_CERT="$(_get_cert)"
 
