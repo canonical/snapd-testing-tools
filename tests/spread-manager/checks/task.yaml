@@ -1,0 +1,22 @@
+summary: smoke test for the spread-manager tool
+
+systems: [ ubuntu-20.04-64 ]
+
+prepare: |
+    wget -qO- wget https://storage.googleapis.com/snapd-spread-tests/spread/spread-amd64.tar.gz | tar xvz - 
+
+restore: |
+    rm -f spread
+
+execute: |
+    spread-manager -h | MATCH "spread-manager set-manual \[--project-path <PROJECT-PATH>\] <TEST-PATH...>"
+    spread-manager --help | MATCH "spread-manager set-manual \[--project-path <PROJECT-PATH>\] <TEST-PATH...>"
+
+    # Set manual task1 with no manualtag
+    spread-manager set-manual --project-path "$PROJECT_PATH" task1
+    test -f task1/task.yaml.back
+    MATCH "^manual: true" < task1/task.yaml
+
+    spread-manager reset-manual --project-path "$PROJECT_PATH" task1
+    ! test -f task1/task.yaml.back
+    NOMATCH "^manual: true" < task1/task.yaml
