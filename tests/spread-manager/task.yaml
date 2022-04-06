@@ -23,7 +23,7 @@ execute: |
     test "$(./spread -list | wc -l)" == 2
 
     spread-manager reset-manual --project-path "$PWD" "checks/$TASK"
-    ! test -f "checks/$TASK/task.yaml.back"
+    test -f "checks/$TASK/task.yaml.back" && exit 1
     NOMATCH "^manual: true" < "checks/$TASK/task.yaml"
 
     test "$(./spread -list | wc -l)" == 3
@@ -37,7 +37,7 @@ execute: |
     test "$(./spread -list | wc -l)" == 2
 
     spread-manager reset-manual --project-path "$PWD" "checks/$TASK"
-    ! test -f "checks/$TASK/task.yaml.back"
+    test -f "checks/$TASK/task.yaml.back" && exit 1
     MATCH "^manual: false" < "checks/$TASK/task.yaml"
 
     test "$(./spread -list | wc -l)" == 3
