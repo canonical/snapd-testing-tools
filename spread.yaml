@@ -32,8 +32,8 @@ backends:
 
 path: /root/snapd-testing-tools
 
-kill-timeout: 5m
-warn-timeout: 2m
+kill-timeout: 10m
+warn-timeout: 3m
 
 prepare: |
     echo "Prepare snapd-testing-tools project"
