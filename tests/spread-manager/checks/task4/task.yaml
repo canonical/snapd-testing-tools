@@ -12,4 +12,4 @@ debug: |
     echo "debugging"
 
 execute: |
-    ![ -z "something" ]
+    echo "executing"
