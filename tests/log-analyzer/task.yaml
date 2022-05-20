@@ -36,6 +36,7 @@ execute: |
     test "$(log-analyzer get-failed project prepare spread-results-all-successful.json)" = 0
     test -z "$(log-analyzer list-failed project restore spread-results-all-successful.json)"
     test "$(log-analyzer get-failed project restore spread-results-all-successful.json)" = 0
+    # shellcheck disable=SC2251
     ! log-analyzer allow-partial-reexecute spread-results-all-successful.json
     test -z "$(log-analyzer list-reexecute-tasks spread-results-all-successful.json)"
 
@@ -45,6 +46,7 @@ execute: |
     test "$(log-analyzer get-successful-tasks spread-results-all-aborted.json)" = 0
     test "$(log-analyzer get-total-tasks spread-results-all-aborted.json)" = 0
     test -z "$(log-analyzer list-failed-tasks spread-results-all-aborted.json)"
+    # shellcheck disable=SC2251
     ! log-analyzer allow-partial-reexecute spread-results-all-aborted.json
     test -z "$(log-analyzer list-reexecute-tasks spread-results-all-aborted.json)"
 
@@ -55,6 +57,7 @@ execute: |
     test "$(log-analyzer get-total-tasks spread-results-with-failed-and-aborted.json)" = 430
     log-analyzer list-failed-tasks spread-results-with-failed-and-aborted.json | MATCH "interfaces-x11-unix-socket"
     log-analyzer list-failed-tasks spread-results-with-failed-and-aborted.json | NOMATCH "install-sideload"
+    # shellcheck disable=SC2251
     ! log-analyzer allow-partial-reexecute spread-results-with-failed-and-aborted.json
     test -z "$(log-analyzer list-reexecute-tasks spread-results-with-failed-and-aborted.json )"
 
@@ -72,6 +75,7 @@ execute: |
     test "$(log-analyzer get-failed project prepare spread-results-with-all-results.json)" = 1
     test "$(log-analyzer list-failed project restore spread-results-with-all-results.json | tr ' ' '\n' | wc -l)" = 2
     test "$(log-analyzer get-failed project restore spread-results-with-all-results.json)" = 2
+    # shellcheck disable=SC2251
     ! log-analyzer allow-partial-reexecute spread-results-with-all-results.json
     test -z "$(log-analyzer list-reexecute-tasks spread-results-with-all-results.json)"
 
