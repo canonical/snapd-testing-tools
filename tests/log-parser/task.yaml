@@ -1,4 +1,4 @@
-summary: test for the log analyzer tool
+summary: test for the log parser tool
 
 # Github actions agents are just running in bionic and focal
 systems: [ubuntu-18.04-64, ubuntu-20.04-64]
