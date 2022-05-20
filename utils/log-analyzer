@@ -171,7 +171,7 @@ allow_partial_reexecute() {
     fi
 
     # Failed tasks at any level have to be greater than 0
-    # In case all the tasks are successfull but either a suite or project have failed to restore, we can't re-execute (no tasks for re-execution)    
+    # In case all the tasks are successful but either a suite or project have failed to restore, we can't re-execute (no tasks for re-execution)    
     if [ $n_failed_total = 0 ]; then
         if [ "$n_suite_restore" != 0 ] || [ "$n_project_restore" != 0 ]; then
             return 1

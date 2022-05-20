@@ -47,7 +47,7 @@ execute: |
     test "$TESTS_FAILED_PROJECT" = "4"
     test "$TESTS_ABORTED" = "24"
 
-    # Check results whith all the failed levels
+    # Check results with all the failed levels
     log-parser with-all-results.log.spread
     TESTS_SUCCESSFUL=$(jq -r '.[] | select( .type == "result") | select( .result_type == "Successful") | .number' spread-results.json)
     TESTS_FAILED_TASKS=$(jq -r '.[] | select( .type == "result") | select( .result_type == "Failed")  | select(.level == "tasks") | .number' spread-results.json)
