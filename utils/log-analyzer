@@ -180,7 +180,7 @@ list_reexecute_tasks() {
         echo "$exec_exp"
         return 
     fi
-    # When all the tests were successfull, then the execution expression is used to reexecute
+    # When all the tests were successful, then the execution expression is used to reexecute
     if [ "$(echo "$reexec_tasks" | wc -w)" = 0 ]; then
         echo "$exec_exp"
         return 

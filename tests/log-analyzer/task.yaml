@@ -8,7 +8,7 @@ prepare: |
     tar -xvzf spread-amd64.tar.gz
     mv spread /usr/bin
 
-retore: |
+restore: |
     rm spread-amd64.tar.gz /usr/bin/spread
 
 execute: |
@@ -27,7 +27,7 @@ execute: |
     log-analyzer list-reexecute-tasks google: data/all-success-failed-restore.json | MATCH "^google:$"
     log-analyzer list-reexecute-tasks google:ubuntu-20.04-64: data/all-success-failed-restore.json | MATCH "^google:ubuntu-20.04-64:$"
 
-    # When all the tests are successfull, the execution expression is returned
+    # When all the tests are successful, the execution expression is returned
     log-analyzer list-reexecute-tasks google: data/all-success.json | MATCH "^google:$"
     log-analyzer list-reexecute-tasks google:ubuntu-20.04-64: data/all-success.json | MATCH "^google:ubuntu-20.04-64:$"
 
