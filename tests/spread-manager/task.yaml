@@ -68,6 +68,14 @@ execute: |
     test "$(./spread -list | wc -l)" == 4
     spread-manager reset-manual --project-path "$PWD" "checks/task1" "checks/task2" "checks/task3"
     test "$(./spread -list | wc -l)" == 3
+    spread-manager set-manual --project-path "$PWD" "checks/task1,checks/task2,checks/task3"
+    test "$(./spread -list | wc -l)" == 1
+    spread-manager reset-manual --project-path "$PWD" "checks/task1,checks/task2,checks/task3"
+    test "$(./spread -list | wc -l)" == 3
+    spread-manager unset-manual --project-path "$PWD" "checks/task1 checks/task2 checks/task3"
+    test "$(./spread -list | wc -l)" == 4
+    spread-manager reset-manual --project-path "$PWD" "checks/task1 checks/task2 checks/task3"
+    test "$(./spread -list | wc -l)" == 3
 
     # Check errors
     spread-manager set-manual --project-path "" 2>&1 | MATCH "spread-manager: project path cannot be empty"

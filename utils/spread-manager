@@ -25,11 +25,12 @@ _check_project_path() {
 }
 
 _check_test_paths() {
-    if [ $# -eq 0 ]; then
+    local test_paths="$@"
+    if [ -z "$test_paths" ]; then
         echo "spread-manager: test path cannot be empty"
         exit 1
     fi
-    for task_path in $@; do
+    for task_path in $test_paths; do
         _check_test_path "$task_path"
     done
 }
@@ -64,17 +65,16 @@ _set_manual_value() {
 
 set_manual() {
     local project_path="$1"
-    local test_path
-    local task_path
     shift
+    local test_paths="$@"
 
     _check_project_path "$project_path"
-    _check_test_paths "$@"
+    test_paths="$(echo $test_paths | tr ',' ' ')"
+    _check_test_paths "$test_paths"
 
-    while [ $# -gt 0 ]; do
-        test_path=$1
+    for test_path in $test_paths; do
+        local task_path
         task_path="$project_path/$test_path/task.yaml"
-        shift
 
         # Backup the task
         cp "$task_path" "$task_path.back"
@@ -84,17 +84,16 @@ set_manual() {
 
 unset_manual() {
     local project_path="$1"
-    local test_path
-    local task_path
     shift
+    local test_paths="$@"
 
     _check_project_path "$project_path"
-    _check_test_paths "$@"
+    test_paths="$(echo $test_paths | tr ',' ' ')"
+    _check_test_paths "$test_paths"
 
-    while [ $# -gt 0 ]; do
-        test_path=$1
+    for test_path in $test_paths; do
+        local task_path
         task_path="$project_path/$test_path/task.yaml"
-        shift
 
         # Backup the task
         cp "$task_path" "$task_path.back"
@@ -104,17 +103,16 @@ unset_manual() {
 
 reset_manual() {
     local project_path="$1"
-    local test_path
-    local task_path
     shift
+    local test_paths="$@"
 
     _check_project_path "$project_path"
-    _check_test_paths "$@"
+    test_paths="$(echo $test_paths | tr ',' ' ')"
+    _check_test_paths "$test_paths"
 
-    while [ $# -gt 0 ]; do
-        test_path=$1
+    for test_path in $test_paths; do
+        local task_path
         task_path="$project_path/$test_path/task.yaml"
-        shift
 
         if [ -f "$task_path.back" ]; then
             mv "$task_path.back" "$task_path"
