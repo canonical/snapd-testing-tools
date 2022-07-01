@@ -24,6 +24,7 @@ backends:
             - fedora-36-64:
             - arch-linux-64:
             - amazon-linux-2-64:
+                storage: preserve-size
             - centos-7-64:
                 storage: preserve-size
             - centos-8-64:
