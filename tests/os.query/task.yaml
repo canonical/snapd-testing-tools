@@ -32,7 +32,7 @@ execute: |
             os.query is-bionic
             os.query is-classic
             os.query is-ubuntu 18.04
-            c
+            ! os.query is-ubuntu 14.04
             ! os.query is-core
             os.query is-pc-amd64
             ;;

@@ -81,7 +81,7 @@ is_fedora() {
     elif [ "$VERSION" == "rawhide" ]; then
         [[ "$SPREAD_SYSTEM" == fedora-rawhide-* ]]
     else
-        grep -qFx 'ID=fedora' /etc/os-release && grep -qFx "VERSION_ID=\"$VERSION\"" /etc/os-release
+        grep -qFx 'ID=fedora' /etc/os-release && grep -qFx "VERSION_ID=$VERSION" /etc/os-release
     fi
 }
 
@@ -109,7 +109,7 @@ is_opensuse() {
     elif [ "$VERSION" == "tumbleweed" ]; then
         grep -qFx 'ID="opensuse-tumbleweed"' /etc/os-release
     else
-        grep -qFx 'ID="centos"' /etc/os-release && grep -qFx "VERSION_ID=\"$VERSION\"" /etc/os-release
+        grep -qFx 'ID="opensuse-leap"' /etc/os-release && grep -qFx "VERSION_ID=\"$VERSION\"" /etc/os-release
     fi
 }
 
