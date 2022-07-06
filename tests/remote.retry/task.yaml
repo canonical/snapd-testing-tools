@@ -17,7 +17,7 @@ execute: |
     remote.retry --help | MATCH 'usage: remote.retry'
     remote.retry -h | MATCH 'usage: remote.retry'
 
-    # check the possitive scenario without parameters
+    # check the positive scenario without parameters
     remote.retry "true"
 
     # check negative scenario
@@ -38,6 +38,6 @@ execute: |
     test "$(grep -c 1 /tmp/my-remote-retry-test)" = 8
     rm -f /tmp/my-remote-retry-test
 
-    # check erros
+    # check errors
     remote.retry --wait 0.5 -n 2 "false" 2>1 | MATCH "remote.retry: timed out retrying command"
     remote.retry 2>1 | MATCH "remote.retry: command to retry not specified"
