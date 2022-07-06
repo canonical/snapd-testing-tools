@@ -6,6 +6,7 @@ show_help() {
     echo "       remote.wait-for snap-command [--wait WAIT] [-n|--attempts ATTEMPTS]"
     echo "       remote.wait-for reboot [--wait WAIT] [-n|--attempts ATTEMPTS]"
     echo "       remote.wait-for device-initialized [--wait WAIT] [-n|--attempts ATTEMPTS]"
+    echo "       remote.wait-for auto-refresh [--wait WAIT] [-n|--attempts ATTEMPTS]"
     echo ""
     echo "Available options:"
     echo "  -h --help   show this help message."
@@ -19,7 +20,7 @@ wait_for_ssh() {
     until remote.exec "true"; do
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
-            echo "Timed out waiting for command 'true' to succeed. Aborting!"
+            echo "remote.wait-for: timed out waiting for ssh connection to succeed"
             return 1
         fi
         sleep "$wait"
@@ -33,7 +34,7 @@ wait_for_no_ssh() {
     while remote.exec "true"; do
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
-            echo "Timed out waiting for command 'true' to fail. Aborting!"
+            echo "remote.wait-for: timed out waiting for ssh connection to fail"
             return 1
         fi
         sleep "$wait"
@@ -45,10 +46,10 @@ wait_for_snap_command() {
     local attempts=$1
     local wait=$2
 
-    while ! remote.exec "command -v snap"; do
+    while ! remote.exec "command -v snap >/dev/null"; do
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
-            echo "Timed out waiting for command 'command -v snap' to success. Aborting!"
+            echo "remote.wait-for: timed out waiting for snap command to succeed"
             return 1
         fi
         sleep "$wait"

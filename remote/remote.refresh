@@ -1,98 +1,151 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 show_help() {
-    echo "usage: remote.refresh [--channel CHANNEL] [--snap SNAPNAME]"
+    echo "usage: remote.refresh snap [--channel CHANNEL] <SNAPNAME>"
+    echo "usage: remote.refresh full [--channel CHANNEL]"
+    echo ""
+    echo "SNAPNAME: allowed options are: kernel, core, base, gadget, snapd or the snap name"
     echo ""
     echo "Available options:"
     echo "  -h --help   show this help message."
     echo ""
 }
 
-check_refresh(){
+check_refresh_after_reboot() {
     local refresh_channel=$1
     local snap=$2
 
-    remote.wait-for no-ssh -n 30 --wait 2
+    remote.wait-for no-ssh -n 60 --wait 2
     remote.wait-for ssh -n 120 --wait 2
-    remote.retry -n 10 --wait 2  "snap info $snap | grep \"tracking: +(latest/${refresh_channel}|${refresh_channel})\""
+    remote.wait-for snap-command
+    remote.retry -n 10 --wait 2  "snap info $snap | grep -q -E \"tracking: +(latest/${refresh_channel}|${refresh_channel})\""
 }
 
+check_refresh() {
+    local refresh_channel=$1
+    local snap=$2
+
+    remote.wait-for ssh -n 60 --wait 2
+    remote.wait-for snap-command
+    remote.retry -n 10 --wait 2  "snap info $snap | grep -q -E \"tracking: +(latest/${refresh_channel}|${refresh_channel})\""
+}
+
+do_refresh() {
+    local snap_name=$1
+    local refresh_channel=$2
+
+    output=$(remote.exec "sudo snap refresh --channel ${refresh_channel} $snap_name 2>&1" || echo "snapd is about to reboot the system")
+    if echo "$output" | grep -E "(no updates available|cannot refresh \"$snap_name\"|is not installed)"; then
+        echo "remote.refresh: snap \"$snap_name\" has no updates available"
+    elif echo "$output" | grep -E "snapd is about to reboot the system"; then
+        check_refresh_after_reboot "$refresh_channel" "$snap_name"
+    else
+        check_refresh "$refresh_channel" "$snap_name"
+    fi
+}
+
+process_line() {
+    local snap_line=$1
+    local refresh_channel=$2
+
+    snap_name=$(echo "$snap_line" | awk '{ print $1 }')
+    snap_channel=$(echo "$snap_line" | awk '{ print $4 }')
+    
+    if [ -z "$refresh_channel" ]; then
+        refresh_channel="$snap_channel"
+    fi
+
+    do_refresh "$snap_name" "$refresh_channel"
+}
 
 refresh_kernel() {
     local refresh_channel=$1
-    local kernel_line kernel_name kernel_channel
+    local kernel_line snap_name kernel_channel
 
-    kernel_line=$(remote.exec "snap list | grep -E 'kernel$'")
+    check_ubuntu_core
+    kernel_line=$(remote.exec "snap list | grep -E ' kernel$'")
     if [ -z "$kernel_line" ]; then
         echo "remote.refresh: no kernel snap to update"
         return
     fi
-    kernel_name=$(echo "$kernel_line" | awk '{ print $1 }')
-    kernel_channel=$(echo "$kernel_line" | awk '{ print $4 }')
+
+    process_line "$kernel_line" "$refresh_channel"
+}
+
+refresh_gadget() {
+    local refresh_channel=$1
+    local gadget_line snap_name gadget_channel
+
+    check_ubuntu_core
+    gadget_line=$(remote.exec "snap list | grep -E ' gadget$'")
+    if [ -z "$gadget_line" ]; then
+        echo "remote.refresh: no gadget snap to update"
+        return
+    fi
     
-    if [ -z "$refresh_channel" ]; then
-        refresh_channel="$kernel_channel"
-    fi
-
-    output=$(remote.exec "sudo snap refresh --channel ${refresh_channel} $kernel_name 2>&1" || true)
-    if echo "$output" | grep -E "(no updates available|cannot refresh \"$kernel_name\"|is not installed)"; then
-        echo "remote.refresh: snap \"$kernel_name\" has no updates available"
-    else
-        check_refresh "$refresh_channel" "$kernel_name"
-    fi
+    process_line "$gadget_line" "$refresh_channel"
 }
 
-refresh_snapd(){
+refresh_snapd() {
     local refresh_channel=$1
-    local snapd_line snapd_name snapd_channel
+    local snapd_line snap_name snapd_channel
 
-    snapd_line=$(remote.exec "snap list | grep -E 'snapd$'")
-    if [ -z "$snapd_line" ]; then
+    if ! snapd_line="$(remote.exec "snap list | grep -E '^snapd.* snapd$'")"; then
         echo "remote.refresh: no snapd snap to update"
-        return
-    fi
-    snapd_name=$(echo "$snapd_line" | awk '{ print $1 }')
-    snapd_channel=$(echo "$snapd_line" | awk '{ print $4 }')
-
-    if [ -z "$refresh_channel" ]; then
-        refresh_channel="$snapd_channel"
+        return 0
     fi
 
-    # Run update and make "|| true" to continue when the connection is closed by remote host
-    output=$(remote.exec "sudo snap refresh --channel ${refresh_channel} $snapd_name 2>&1" || true)
-    if echo "$output" | grep -E "(no updates available|cannot refresh \"$snapd_name\"|is not installed)"; then
-        echo "remote.refresh: snap \"$snapd_name\" has no updates available"
-    else
-        check_refresh "$refresh_channel" "$snapd_name"
-    fi
+    process_line "$snapd_line" "$refresh_channel"
 }
 
-refresh_core(){
+refresh_core() {
     local refresh_channel=$1
-    local core_line core_name core_channel
+    local core_line snap_name core_channel
 
-    core_line=$(remote.exec "snap list | grep -E '(core18|core20|core22)'")
-    if [ -z "$core_line" ]; then
+    if ! core_line="$(remote.exec "snap list | grep -E '^core.* core$'")"; then
         echo "remote.refresh: no core snap to update"
-        return
-    fi
-    core_name=$(echo "$core_line" | awk '{ print $1 }')
-    core_channel=$(echo "$core_line" | awk '{ print $4 }')
-
-    if [ -z "$refresh_channel" ]; then
-        refresh_channel="$core_channel"
+        return 0
     fi
 
-    # Run update and make "|| true" to continue when the connection is closed by remote host
-    output=$(remote.exec "sudo snap refresh --channel ${refresh_channel} $core_name 2>&1" || true)
-    if echo "$output" | grep -E "(no updates available|cannot refresh \"$core_name\"|is not installed)"; then
-        echo "remote.refresh: snap \"$core_name\" has no updates available"
-    else
-        check_refresh "$refresh_channel" "$core_name"
-    fi
+    process_line "$core_line" "$refresh_channel"
 }
 
-refresh_all(){
+refresh_core_base() {
+    local refresh_channel=$1
+    local base_line snap_name core_channel
+
+    if ! base_line="$(remote.exec "snap list | grep -E '^core.* base$'")"; then
+        echo "remote.refresh: no core base snap to update"
+        return 0
+    fi
+
+    if [ "$(echo "$base_line" | wc -l)" -gt 1 ]; then
+        echo "remote.refresh: there is more than 1 core base snap to update, skipping"
+        return 0
+    fi
+
+    process_line "$base_line" "$refresh_channel"
+}
+
+refresh_snap() {
+    local snapname=$1
+    local refresh_channel=$2
+
+    if [ -z "$snapname" ]; then
+        echo "remote.refresh: snap name to refresh is not specified"
+        return 1
+    fi
+
+    if ! remote.exec "snap list $snapname"; then
+        echo "remote.refresh: no $snapname snap to update"
+        return 0
+    fi
+
+    snap_line="$(remote.exec "snap list $snapname" | tail -1)"
+    process_line "$snap_line" "$refresh_channel"
+}
+
+refresh_all() {
     # Run update and make "|| true" to continue when the connection is closed by remote host or not any snap to update
     remote.exec "sudo snap refresh" || true
     remote.wait-for ssh
@@ -103,86 +156,101 @@ get_boot_id() {
     remote.exec "cat /proc/sys/kernel/random/boot_id"
 }
 
-
-full_refresh(){
+full_refresh() {
     remote.wait-for auto-refresh
-    refresh_core "$core_channel"
+    refresh_core
     remote.wait-for auto-refresh
-    refresh_snapd "$snapd_channel"
+    refresh_core_base
     remote.wait-for auto-refresh
-    refresh_kernel "$kernel_channel"
+    refresh_snapd
+    remote.wait-for auto-refresh
+    refresh_kernel
     refresh_all
 }
 
-
-
-main() {
-    local action wait attempts others
-    case "$1" in
-        -h|--help)
-            show_help
-            exit
-            ;;
-        ssh)
-            action=wait_for_ssh
-            attempts=800
-            wait=1
-            shift
-            ;;
-        no-ssh)
-            action=wait_for_no_ssh
-            attempts=200
-            wait=1
-            shift
-            ;;
-        snap-command)
-            action=wait_for_snap_command
-            attempts=200
-            wait=1
-            shift
-            ;;
-        reboot)
-            action=wait_for_reboot
-            attempts=150
-            wait=5
-            shift
-            ;;
-        device-initialized)
-            action=wait_for_device_initialized
-            attempts=60
-            wait=1
-            shift
-            ;;
-        *)
-            echo "remote.wait-for: unsupported parameter $1" >&2
-            exit 1
-            ;;
-    esac
-
-    if [ -z "$(declare -f "$action")" ]; then
-        echo "remote.wait-for: no such command: $action"
-        show_help
-        exit 1
-    fi
+snap_refresh() {
+    local channel snapname
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            --wait)                
-                wait=$2
-                shift 2
-                ;;
-            --attempts|-n)                
-                attempts=$2
+            --channel)
+                channel=$2
                 shift 2
                 ;;
             *)
-                others="$others $1"
+                snapname=$1
                 shift
                 ;;
         esac
     done
 
-    "$action" "$attempts" "$wait" "$others"
+    if [ -z "$snapname" ]; then
+        echo "remote.refresh: snap name to refresh is not specified"
+        return 1
+    fi
+
+    case "$snapname" in
+        core)
+            refresh_core "$channel"
+            ;;
+        base)
+            refresh_core_base "$channel"
+            ;;
+        snapd)
+            refresh_snapd "$channel"
+            ;;
+        kernel)
+            refresh_kernel "$channel"
+            ;;
+        gadget)
+            refresh_gadget "$channel"
+            ;;
+        *)
+            refresh_snap "$snapname" "$channel"
+            ;;
+    esac
+}
+
+check_ubuntu_core() {
+    if ! remote.exec "cat /etc/os-release | grep ID=ubuntu-core"; then
+        echo "remote.refresh: this function can be used just with ubuntu core systems"
+        return 1
+    fi
+}
+
+main() {
+    if [ $# -eq 0 ]; then
+        show_help
+        exit
+    fi
+
+    local action
+    case "$1" in
+        -h|--help)
+            show_help
+            exit
+            ;;
+        full)
+            action=full_refresh
+            shift
+            ;;
+        snap)
+            action=snap_refresh
+            shift
+            ;;
+        *)
+            echo "remote.refresh: unsupported parameter $1" >&2
+            exit 1
+            ;;
+    esac
+
+    if [ -z "$(declare -f "$action")" ]; then
+        echo "remote.refresh: no such command: $action"
+        show_help
+        exit 1
+    fi
+
+    "$action" "$@"
 }
 
 main "$@"

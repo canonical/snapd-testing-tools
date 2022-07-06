@@ -2,6 +2,11 @@ summary: smoke test for the tests.systemd tool
 
 backends: [google]
 
+systems: [-ubuntu-14.04-64]
+
+restore: |
+    tests.systemd stop-and-remove-unit my-test || true
+
 execute: |
     tests.systemd | MATCH 'usage: tests.systemd create-and-start-unit'
     tests.systemd -h | MATCH 'usage: tests.systemd create-and-start-unit'
@@ -30,7 +35,10 @@ execute: |
     tests.systemd stop-and-remove-unit my-test
 
     # check unit override
-    tests.systemd create-and-start-unit my-test "sleep 100" "[Service]\\nRestart=always\\nType=simple"
+    tests.systemd create-and-start-unit my-test "sleep 100" "[Unit]\nAfter=foo"
     systemctl cat my-test | MATCH "^ExecStart=sleep 100$"
-    systemctl cat my-test | MATCH "^Restart=always$"
-    tests.systemd stop-and-remove-unit my-test    
+    systemctl cat my-test | MATCH "^After=foo$"
+    tests.systemd stop-and-remove-unit my-test
+
+    # check a unit can be removed when it already was removed
+    tests.systemd stop-and-remove-unit my-test

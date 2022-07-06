@@ -23,7 +23,6 @@ remote_retry(){
     done
 }
 
-
 main() {
     local wait attempts cmd
     wait=1
@@ -44,12 +43,17 @@ main() {
                 shift 2
                 ;;
             *)
-                cmd="$@"
                 break
                 ;;
         esac
     done
 
+    if [ $# -eq 0 ]; then
+        echo "remote.retry: command to retry not specified"
+        return 1
+    fi
+
+    remote_retry "$attempts" "$wait" "$@"
 }
 
-remote_retry "$attempts" "$wait" "$cmd"
+main "$@"

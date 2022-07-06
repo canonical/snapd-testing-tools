@@ -55,7 +55,9 @@ execute: |
     remote.wait-for reboot --wait 5 -n 20 "$initial_boot_id"
 
     # Check waiting for reboot with not enough time
+    remote.retry --wait 1 -n 10 'test -n "$(cat /proc/sys/kernel/random/boot_id)"'
     second_boot_id="$(remote.exec "cat /proc/sys/kernel/random/boot_id")"
+
     remote.exec "sudo reboot" || true
     ! remote.wait-for reboot --wait 1 -n 5 "$second_boot_id"
 
@@ -63,7 +65,10 @@ execute: |
     remote.wait-for device-initialized --wait 1 -n 60
     remote.wait-for snap-command
 
+    remote.retry --wait 1 -n 10 'test -n "$(cat /proc/sys/kernel/random/boot_id)"'
     third_boot_id="$(remote.exec "cat /proc/sys/kernel/random/boot_id")"
 
+    # Check boot ids are different
     test "$initial_boot_id" != "$second_boot_id"
     test "$second_boot_id" != "$third_boot_id"
+    

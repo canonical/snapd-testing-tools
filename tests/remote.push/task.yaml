@@ -7,6 +7,7 @@ systems: [-amazon-linux-*]
 
 prepare: |
     tests.pkgs install sshpass
+    remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-user-1
 
 restore: |
     tests.pkgs remove sshpass
@@ -17,7 +18,6 @@ execute: |
     remote.push -h | MATCH 'usage: remote.push <LOCAL_PATH> <REMOTE_PATH>'
 
     # check basic push 
-    remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-user-1
     touch testfile
     remote.push testfile "/home/tools-user-1"
     test -f /home/tools-user-1/testfile
