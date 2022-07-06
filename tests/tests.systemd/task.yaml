@@ -1,0 +1,34 @@
+summary: smoke test for the tests.systemd tool
+
+execute: |
+    tests.systemd | MATCH 'usage: tests.systemd create-and-start-unit'
+    tests.systemd -h | MATCH 'usage: tests.systemd create-and-start-unit'
+    tests.systemd --help | MATCH 'usage: tests.systemd create-and-start-unit'
+
+    # check a simple unit
+    tests.systemd create-and-start-unit my-test "sleep 500"
+    systemctl is-active my-test
+    tests.systemd stop-and-remove-unit my-test
+    ! systemctl is-active my-test
+
+    # check the wait-for-service works when unit is inactive
+    tests.systemd create-and-start-unit my-test "sleep 5"
+    tests.systemd wait-for-service my-test active
+    tests.systemd wait-for-service my-test inactive
+    tests.systemd stop-and-remove-unit my-test
+    systemctl status my-test 2>&1 | MATCH "Unit my-test.service could not be found."
+
+    # check missing parameters and start twice the same unit
+    tests.systemd create-and-start-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"
+    tests.systemd create-and-start-unit my-test  2>&1 | MATCH "tests.systemd: unit command line cannot be empty"
+    tests.systemd create-and-start-unit my-test "sleep 5"
+    tests.systemd create-and-start-unit my-test "sleep 5" 2>&1 | MATCH "tests.systemd: unit service file already exist"
+    tests.systemd stop-and-remove-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"
+    tests.systemd stop-and-remove-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"
+    tests.systemd stop-and-remove-unit my-test
+
+    # check unit override
+    tests.systemd create-and-start-unit my-test "sleep 100" "[Unit]\nExecStart=sleep 5"
+    systemctl cat my-test | MATCH "^ExecStart=sleep 5$"
+    systemctl cat my-test | NOMATCH "^ExecStart=sleep 100$"
+    tests.systemd stop-and-remove-unit my-test    

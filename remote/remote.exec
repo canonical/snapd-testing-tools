@@ -71,7 +71,7 @@ remote_exec() {
     SSH_PASS="$(_get_pass)"
     SSH_CERT="$(_get_cert)"
 
-    $SSH_PASS ssh $SSH_CERT -p "$TESTS_REMOTE_PORT" -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
+    $SSH_PASS ssh $SSH_CERT -p "$TESTS_REMOTE_PORT" -o LogLevel=ERROR -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
 }
 
 main() {    
