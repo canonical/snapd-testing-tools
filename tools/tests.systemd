@@ -62,7 +62,7 @@ wait_for_service() {
     local service_name="$1"
     local state="${2:-active}"
 
-    if [ -z "$name" ]; then
+    if [ -z "$service_name" ]; then
         echo "tests.systemd: unit name cannot be empty"
         return 1
     fi

@@ -1,5 +1,7 @@
 summary: smoke test for the tests.systemd tool
 
+backends: [google]
+
 execute: |
     tests.systemd | MATCH 'usage: tests.systemd create-and-start-unit'
     tests.systemd -h | MATCH 'usage: tests.systemd create-and-start-unit'
@@ -28,7 +30,7 @@ execute: |
     tests.systemd stop-and-remove-unit my-test
 
     # check unit override
-    tests.systemd create-and-start-unit my-test "sleep 100" "[Unit]\nExecStart=sleep 5"
-    systemctl cat my-test | MATCH "^ExecStart=sleep 5$"
-    systemctl cat my-test | NOMATCH "^ExecStart=sleep 100$"
+    tests.systemd create-and-start-unit my-test "sleep 100" "[Service]\\nRestart=always\\nType=simple"
+    systemctl cat my-test | MATCH "^ExecStart=sleep 100$"
+    systemctl cat my-test | MATCH "^Restart=always$"
     tests.systemd stop-and-remove-unit my-test    
