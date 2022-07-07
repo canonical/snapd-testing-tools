@@ -23,7 +23,7 @@ execute: |
     tests.systemd wait-for-service my-test active
     tests.systemd wait-for-service my-test inactive
     tests.systemd stop-and-remove-unit my-test
-    systemctl status my-test 2>&1 | MATCH "Unit my-test.service could not be found."
+    systemctl list-unit-files | NOMATCH my-test
 
     # check missing parameters and start twice the same unit
     tests.systemd create-and-start-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"

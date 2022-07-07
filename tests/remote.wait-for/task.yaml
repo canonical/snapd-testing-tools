@@ -60,7 +60,8 @@ execute: |
     second_boot_id="$(remote.exec "cat /proc/sys/kernel/random/boot_id")"
 
     remote.exec "sudo reboot" || true
-    not remote.wait-for reboot --wait 1 -n 5 "$second_boot_id"
+    # shellcheck disable=SC2251
+    ! remote.wait-for reboot --wait 0.5 -n 5 "$second_boot_id"
 
     # Check again if the device has been initialized and the snap command
     remote.wait-for device-initialized --wait 1 -n 60
