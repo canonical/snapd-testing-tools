@@ -1,6 +1,6 @@
 summary: smoke test for the remote.wait-for tool
 
-bachends: [google-nested]
+backends: [google-nested]
 
 systems: [ubuntu-20.04-64]
 

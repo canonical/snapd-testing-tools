@@ -13,13 +13,13 @@ execute: |
     tests.systemd --help | MATCH 'usage: tests.systemd create-and-start-unit'
 
     # check a simple unit
-    tests.systemd create-and-start-unit my-test "sleep 500"
+    tests.systemd create-and-start-unit my-test "/bin/sleep 500"
     systemctl is-active my-test
     tests.systemd stop-and-remove-unit my-test
-    ! systemctl is-active my-test
+    not systemctl is-active my-test
 
     # check the wait-for-service works when unit is inactive
-    tests.systemd create-and-start-unit my-test "sleep 5"
+    tests.systemd create-and-start-unit my-test "/bin/sleep 5"
     tests.systemd wait-for-service my-test active
     tests.systemd wait-for-service my-test inactive
     tests.systemd stop-and-remove-unit my-test
@@ -28,15 +28,15 @@ execute: |
     # check missing parameters and start twice the same unit
     tests.systemd create-and-start-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"
     tests.systemd create-and-start-unit my-test  2>&1 | MATCH "tests.systemd: unit command line cannot be empty"
-    tests.systemd create-and-start-unit my-test "sleep 5"
-    tests.systemd create-and-start-unit my-test "sleep 5" 2>&1 | MATCH "tests.systemd: unit service file already exist"
+    tests.systemd create-and-start-unit my-test "/bin/sleep 5"
+    tests.systemd create-and-start-unit my-test "/bin/sleep 5" 2>&1 | MATCH "tests.systemd: unit service file already exist"
     tests.systemd stop-and-remove-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"
     tests.systemd stop-and-remove-unit 2>&1 | MATCH "tests.systemd: unit name cannot be empty"
     tests.systemd stop-and-remove-unit my-test
 
     # check unit override
-    tests.systemd create-and-start-unit my-test "sleep 100" "[Unit]\nAfter=foo"
-    systemctl cat my-test | MATCH "^ExecStart=sleep 100$"
+    tests.systemd create-and-start-unit my-test "/bin/sleep 100" "[Unit]\nAfter=foo"
+    systemctl cat my-test | MATCH "^ExecStart=/bin/sleep 100$"
     systemctl cat my-test | MATCH "^After=foo$"
     tests.systemd stop-and-remove-unit my-test
 

@@ -1,6 +1,6 @@
 summary: smoke test for the remote.wait-for tool
 
-bachends: [google-nested]
+backends: [google-nested]
 
 systems: [ubuntu-20.04-64]
 
@@ -55,16 +55,18 @@ execute: |
     remote.wait-for reboot --wait 5 -n 20 "$initial_boot_id"
 
     # Check waiting for reboot with not enough time
-    remote.retry --wait 1 -n 10 'test -n "$(cat /proc/sys/kernel/random/boot_id)"'
+    # shellcheck disable=SC2016
+    remote.retry --wait 1 -n 10 'test -n "$(cat /proc/sys/kernel/random/boot_id)"'    
     second_boot_id="$(remote.exec "cat /proc/sys/kernel/random/boot_id")"
 
     remote.exec "sudo reboot" || true
-    ! remote.wait-for reboot --wait 1 -n 5 "$second_boot_id"
+    not remote.wait-for reboot --wait 1 -n 5 "$second_boot_id"
 
     # Check again if the device has been initialized and the snap command
     remote.wait-for device-initialized --wait 1 -n 60
     remote.wait-for snap-command
 
+    # shellcheck disable=SC2016
     remote.retry --wait 1 -n 10 'test -n "$(cat /proc/sys/kernel/random/boot_id)"'
     third_boot_id="$(remote.exec "cat /proc/sys/kernel/random/boot_id")"
 

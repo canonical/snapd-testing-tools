@@ -21,7 +21,7 @@ execute: |
     remote.retry "true"
 
     # check negative scenario
-    ! remote.retry --wait 1 -attempts 2 "false"
+    not remote.retry --wait 1 -attempts 2 "false"
 
     # check the command is executed correctly
     rm -f /tmp/my-remote-retry-test
@@ -29,15 +29,15 @@ execute: |
     test -f /tmp/my-remote-retry-test
 
     # check the --attempts and --wait parameter
-    ! remote.retry --wait 0.5 --attempts 5 "echo 1 >> /tmp/my-remote-retry-test && exit 1"
+    not remote.retry --wait 0.5 --attempts 5 "echo 1 >> /tmp/my-remote-retry-test && exit 1"
     test "$(grep -c 1 /tmp/my-remote-retry-test)" = 5
     rm -f /tmp/my-remote-retry-test
 
     # check the -n parameter
-    ! remote.retry --wait 0.5 -n 8 "echo 1 >> /tmp/my-remote-retry-test && exit 1"
+    not remote.retry --wait 0.5 -n 8 "echo 1 >> /tmp/my-remote-retry-test && exit 1"
     test "$(grep -c 1 /tmp/my-remote-retry-test)" = 8
     rm -f /tmp/my-remote-retry-test
 
     # check errors
-    remote.retry --wait 0.5 -n 2 "false" 2>1 | MATCH "remote.retry: timed out retrying command"
-    remote.retry 2>1 | MATCH "remote.retry: command to retry not specified"
+    remote.retry --wait 0.5 -n 2 "false" 2>&1 | MATCH "remote.retry: timed out retrying command"
+    remote.retry 2>&1 | MATCH "remote.retry: command to retry not specified"
