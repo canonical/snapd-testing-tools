@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 show_help() {
     echo "usage: remote.refresh snap [--channel CHANNEL] <SNAPNAME>"
@@ -38,21 +38,21 @@ do_refresh() {
     if echo "$output" | grep -E "(no updates available|cannot refresh \"$snap_name\"|is not installed)"; then
         echo "remote.refresh: snap \"$snap_name\" has no updates available"
     elif echo "$output" | grep -E "snapd is about to reboot the system"; then
+        remote.exec --timeout 3 "sudo reboot" || true
         check_refresh_after_reboot "$refresh_channel" "$snap_name"
     else
         check_refresh "$refresh_channel" "$snap_name"
     fi
 }
 
-process_line() {
-    local snap_line=$1
+process_refresh() {
+    local snap_name=$1
     local refresh_channel=$2
-
-    snap_name=$(echo "$snap_line" | awk '{ print $1 }')
-    snap_channel=$(echo "$snap_line" | awk '{ print $4 }')
     
     if [ -z "$refresh_channel" ]; then
-        refresh_channel="$snap_channel"
+        # Tracking is retrieved from snap info command because in old versions of
+        # snapd the tracking is not included in the snap list output
+        refresh_channel="$(snap info "$snap_name" | grep -E '^tracking:' |  awk '{ print $2 }')"
     fi
 
     do_refresh "$snap_name" "$refresh_channel"
@@ -60,61 +60,63 @@ process_line() {
 
 refresh_kernel() {
     local refresh_channel=$1
-    local kernel_line snap_name kernel_channel
+    local snap_name
 
     check_ubuntu_core
-    kernel_line=$(remote.exec "snap list | grep -E ' kernel$'")
-    if [ -z "$kernel_line" ]; then
+    snap_name="$(remote.exec "snap list" | grep -E '(kernel$|kernel,)' | awk '{ print $1 }')"
+    if [ -z "$snap_name" ]; then
         echo "remote.refresh: no kernel snap to update"
         return
     fi
 
-    process_line "$kernel_line" "$refresh_channel"
+    process_refresh "$snap_name" "$refresh_channel"
 }
 
 refresh_gadget() {
     local refresh_channel=$1
-    local gadget_line snap_name gadget_channel
+    local snap_name
 
     check_ubuntu_core
-    gadget_line=$(remote.exec "snap list | grep -E ' gadget$'")
-    if [ -z "$gadget_line" ]; then
+    snap_name="$(remote.exec "snap list" | grep -E '(gadget$|gadget,)' | awk '{ print $1 }')"
+    if [ -z "$snap_name" ]; then
         echo "remote.refresh: no gadget snap to update"
         return
     fi
     
-    process_line "$gadget_line" "$refresh_channel"
+    process_refresh "$snap_name" "$refresh_channel"
 }
 
 refresh_snapd() {
     local refresh_channel=$1
-    local snapd_line snap_name snapd_channel
+    local snap_name
 
-    if ! snapd_line="$(remote.exec "snap list | grep -E '^snapd.* snapd$'")"; then
+    snap_name="$(remote.exec "snap list" | grep -E '^snapd.*(snapd$|snapd,)' | awk '{ print $1 }')"
+    if [ -z "$snap_name" ]; then
         echo "remote.refresh: no snapd snap to update"
         return 0
     fi
 
-    process_line "$snapd_line" "$refresh_channel"
+    process_refresh "$snap_name" "$refresh_channel"
 }
 
 refresh_core() {
     local refresh_channel=$1
-    local core_line snap_name core_channel
+    local snap_name
 
-    if ! core_line="$(remote.exec "snap list | grep -E '^core.* core$'")"; then
+    snap_name="$(remote.exec "snap list" | grep -E '^core.*(core$|core,)' | awk '{ print $1 }')"
+    if [ -z "$snap_name" ]; then
         echo "remote.refresh: no core snap to update"
         return 0
     fi
 
-    process_line "$core_line" "$refresh_channel"
+    process_refresh "$snap_name" "$refresh_channel"
 }
 
 refresh_core_base() {
     local refresh_channel=$1
     local base_line snap_name core_channel
 
-    if ! base_line="$(remote.exec "snap list | grep -E '^core.* base$'")"; then
+    if ! base_line="$(remote.exec "snap list | grep -E '^core.* (base$|base,)'")"; then
         echo "remote.refresh: no core base snap to update"
         return 0
     fi
@@ -124,7 +126,7 @@ refresh_core_base() {
         return 0
     fi
 
-    process_line "$base_line" "$refresh_channel"
+    process_refresh "$base_line" "$refresh_channel"
 }
 
 refresh_snap() {
@@ -142,7 +144,7 @@ refresh_snap() {
     fi
 
     snap_line="$(remote.exec "snap list $snapname" | tail -1)"
-    process_line "$snap_line" "$refresh_channel"
+    process_refresh "$snap_line" "$refresh_channel"
 }
 
 refresh_all() {
