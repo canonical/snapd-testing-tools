@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script is used to setup the path and other environemnt variables needed
+# This script is used to setup the path and other environment variables needed
 # to run the tools when the tools aren't used as part of a spread test.
 # The steps are:
 # 1. source the file: `. <PATH_TO_PROJECT>/setup.sh`
