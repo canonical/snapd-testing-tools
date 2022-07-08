@@ -52,7 +52,7 @@ process_refresh() {
     if [ -z "$refresh_channel" ]; then
         # Tracking is retrieved from snap info command because in old versions of
         # snapd the tracking is not included in the snap list output
-        refresh_channel="$(snap info "$snap_name" | grep -E '^tracking:' |  awk '{ print $2 }')"
+        refresh_channel="$(remote.exec "snap info $snap_name" | grep -E '^tracking:' |  awk '{ print $2 }')"
     fi
 
     do_refresh "$snap_name" "$refresh_channel"
