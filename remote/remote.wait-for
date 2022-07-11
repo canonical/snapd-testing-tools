@@ -64,7 +64,7 @@ wait_for_reboot() {
     local attempts=$1
     local wait=$2
     local initial_boot_id=$3
-    local last_boot_id="$initial_boot_id"
+    local last_boot_id
 
     if [ -z "$initial_boot_id" ]; then
         echo "remote.wait-for: initial boot id not set"
@@ -181,7 +181,11 @@ main() {
                 shift 2
                 ;;
             *)
-                others="$others $1"
+                if [ -z "$others" ]; then
+                    others=$1
+                else
+                    others="$others $1"
+                fi
                 shift
                 ;;
         esac
