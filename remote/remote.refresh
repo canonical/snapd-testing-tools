@@ -55,6 +55,7 @@ process_refresh() {
         refresh_channel="$(remote.exec "snap info $snap_name" | grep -E '^tracking:' |  awk '{ print $2 }')"
     fi
 
+    echo "remote.refresh: Refreshing $snap_name snap from $refresh_channel channel"
     do_refresh "$snap_name" "$refresh_channel"
 }
 

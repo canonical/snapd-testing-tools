@@ -17,7 +17,7 @@ wait_for_ssh() {
     local attempts=$1
     local wait=$2
 
-    until remote.exec "true"; do
+    until remote.exec "true" >/dev/null; do
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
             echo "remote.wait-for: timed out waiting for ssh connection to succeed"
@@ -25,13 +25,14 @@ wait_for_ssh() {
         fi
         sleep "$wait"
     done
+    echo "remote.wait-for: ssh connection stablished"
 }
 
 wait_for_no_ssh() {
     local attempts=$1
     local wait=$2
 
-    while remote.exec "true"; do
+    while remote.exec "true" >/dev/null; do
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
             echo "remote.wait-for: timed out waiting for ssh connection to fail"
@@ -39,6 +40,7 @@ wait_for_no_ssh() {
         fi
         sleep "$wait"
     done
+    echo "remote.wait-for: ssh connection lost"
 }
 
 
@@ -46,7 +48,7 @@ wait_for_snap_command() {
     local attempts=$1
     local wait=$2
 
-    while ! remote.exec "command -v snap >/dev/null"; do
+    while ! remote.exec "command -v snap" >/dev/null; do
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
             echo "remote.wait-for: timed out waiting for snap command to succeed"
@@ -54,6 +56,7 @@ wait_for_snap_command() {
         fi
         sleep "$wait"
     done
+    echo "remote.wait-for: snap command ready"   
 }
 
 get_boot_id() {
@@ -81,7 +84,13 @@ wait_for_reboot() {
         sleep "$wait"
     done
 
-    [ "$last_boot_id" != "$initial_boot_id" ]
+    if [ "$last_boot_id" != "$initial_boot_id" ]; then
+        echo "remote.wait-for: reboot completed"
+    else
+        echo "remote.wait-for: boot id did not change"
+        return 1
+    fi
+
 }
 
 wait_for_device_initialized() {
@@ -96,10 +105,11 @@ wait_for_device_initialized() {
         fi
         sleep "$wait"
     done
+    echo "remote.wait-for: device initialized"
 }
 
 wait_auto_refresh(){
-    if remote.exec "snap changes" | grep -q -E "Doing.*Auto-refresh snap.*"; then
+    if remote.exec "snap changes" | grep -Eq "Doing.*Auto-refresh snap.*"; then
         remote.retry -n 120 --wait 5  "snap changes | grep \"Doing.*Auto-refresh.*\""
         wait_for_ssh -n 120 --wait 5
         
@@ -109,6 +119,9 @@ wait_auto_refresh(){
         fi
 
         remote.retry -n 120 --wait 4  "snap changes | grep \"Done.*Auto-refresh.*\""
+        echo "remote.wait-for: auto-refresh completed"
+    else
+        echo "remote.wait-for: no auto-refresh in progress"
     fi
 }
 
