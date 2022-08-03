@@ -161,14 +161,20 @@ get_boot_id() {
 
 full_refresh() {
     remote.wait-for auto-refresh
+    remote.wait-for refresh
     refresh_core
     remote.wait-for auto-refresh
+    remote.wait-for refresh
     refresh_core_base
     remote.wait-for auto-refresh
+    remote.wait-for refresh
     refresh_snapd
     remote.wait-for auto-refresh
+    remote.wait-for refresh
     refresh_kernel
+    remote.wait-for refresh
     refresh_all
+    remote.wait-for refresh
 }
 
 snap_refresh() {
