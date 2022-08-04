@@ -7,7 +7,6 @@ show_help() {
     echo "       remote.wait-for reboot [--wait WAIT] [-n|--attempts ATTEMPTS]"
     echo "       remote.wait-for device-initialized [--wait WAIT] [-n|--attempts ATTEMPTS]"
     echo "       remote.wait-for refresh [--wait WAIT] [-n|--attempts ATTEMPTS]"
-    echo "       remote.wait-for auto-refresh [--wait WAIT] [-n|--attempts ATTEMPTS]"
     echo ""
     echo "Available options:"
     echo "  -h --help   show this help message."
@@ -17,15 +16,19 @@ show_help() {
 wait_for_ssh() {
     local attempts=$1
     local wait=$2
+    echo "remote.wait-for: waiting for ssh connection"
 
     until remote.exec "true" &>/dev/null; do
+        echo -n '.'
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
+            echo ""
             echo "remote.wait-for: timed out waiting for ssh connection to succeed"
             return 1
         fi
         sleep "$wait"
     done
+    echo ""
     echo "remote.wait-for: ssh connection stablished"
 }
 
@@ -36,13 +39,16 @@ wait_for_no_ssh() {
     echo "remote.wait-for: waiting for no ssh connection"
 
     while remote.exec "true" &>/dev/null; do
+        echo -n '.'
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
+            echo ""
             echo "remote.wait-for: timed out waiting for ssh connection to fail"
             return 1
         fi
         sleep "$wait"
     done
+    echo ""
     echo "remote.wait-for: ssh connection lost"
 }
 
@@ -54,13 +60,16 @@ wait_for_snap_command() {
     echo "remote.wait-for: waiting for snap command"
 
     while ! remote.exec "command -v snap" &>/dev/null; do
+        echo -n '.'
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
+            echo ""
             echo "remote.wait-for: timed out waiting for snap command to succeed"
             return 1
         fi
         sleep "$wait"
     done
+    echo ""
     echo "remote.wait-for: snap command ready"   
 }
 
@@ -89,6 +98,7 @@ wait_for_reboot() {
     fi
 
     while [ $attempts -ge 0 ]; do
+        echo -n '.'
         attempts=$(( attempts - 1 ))
         # The get_boot_id could fail because the connection is broken due to the reboot
         last_boot_id="$(get_boot_id)" || true
@@ -98,6 +108,7 @@ wait_for_reboot() {
         sleep "$wait"
     done
 
+    echo ""
     if [ "$last_boot_id" != "$initial_boot_id" ]; then
         echo "remote.wait-for: reboot completed"
     else
@@ -114,50 +125,38 @@ wait_for_device_initialized() {
     echo "remote.wait-for: waiting for device initialized"
 
     while ! remote.exec "snap changes" | grep -Eq "Done.*Initialize device"; do
+        echo -n '.'
         attempts=$(( attempts - 1 ))
         if [ $attempts -le 0 ]; then
+            echo ""
             echo "remote.wait-for: timed out waiting for device to be fully initialized. Aborting!"
             return 1
         fi
         sleep "$wait"
     done
+    echo ""
     echo "remote.wait-for: device initialized"
 }
 
-wait_for_auto_refresh(){
-    echo "remote.wait-for: waiting for auto-refresh"
-
-    if remote.exec "snap changes" | grep -Eq "Doing.*Auto-refresh snap.*"; then
-        remote.retry -n 120 --wait 5  "snap changes | grep \"Doing.*Auto-refresh.*\""
-        wait_for_ssh -n 120 --wait 5
-        
-        if remote.exec "snap changes" | grep "Error.*Auto-refresh.*"; then
-            echo "remote.wait-for: auto-refresh failed"
-            return 1
-        fi
-
-        remote.retry -n 120 --wait 4  "snap changes | grep \"Done.*Auto-refresh.*\""
-        echo "remote.wait-for: auto-refresh completed"
-    else
-        echo "remote.wait-for: no auto-refresh in progress"
-    fi
-}
-
 wait_for_refresh(){
-    echo "remote.wait-for: waiting for refresh"
+    echo "remote.wait-for: waiting for either auto-refresh or refresh"
 
-    if remote.exec "snap changes" | grep -Eq "Doing.*Refresh"; then
-        while remote.exec "snap changes" | grep -Eq "Doing.*Refresh"; do
+    if remote.exec "snap changes" | grep -Eq "Doing.*(Auto-refresh|Refresh)"; then
+        echo "remote.wait-for: Refresh in progress"
+
+        while remote.exec "snap changes" | grep -Eq "Doing.*(Auto-refresh|Refresh)"; do
+            echo -n '.'
             if remote.exec "true" &>/dev/null; then
                 sleep 1
             fi
         done
+        echo ""
 
         if ! remote.exec "true" &>/dev/null; then
             wait_for_ssh -n 120 --wait 5
         fi
 
-        if remote.exec "snap changes" | grep "Doing.*Refresh"; then
+        if remote.exec "snap changes" | grep -Eq "Doing.*(Auto-refresh|Refresh)"; then
             echo "remote.wait-for: still doing refresh, exiting"
         else
             echo "remote.wait-for: refresh completed"
@@ -207,10 +206,6 @@ main() {
             action=wait_for_device_initialized
             attempts=60
             wait=1
-            shift
-            ;;
-        auto-refresh)
-            action=wait_for_auto_refresh
             shift
             ;;
         refresh)

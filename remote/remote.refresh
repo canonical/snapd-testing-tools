@@ -33,7 +33,7 @@ check_refresh() {
 }
 
 check_waiting_for_reboot() {
-    remote.exec "sudo journalctl -n 30 -u snapd" | grep -q "Waiting for system reboot"
+    remote.exec "sudo journalctl -n 30" | grep -q "Waiting for system reboot"
 }
 
 check_ready_to_refresh() {
@@ -41,7 +41,6 @@ check_ready_to_refresh() {
         echo "remote.refresh: waiting for system reboot"
         remote.wait-for reboot
     fi
-    remote.wait-for auto-refresh
     remote.wait-for refresh
 }
 
@@ -240,6 +239,7 @@ snap_refresh() {
 }
 
 check_ubuntu_core() {
+    remote.wait-for ssh
     if ! remote.exec "cat /etc/os-release" | grep -q "ID=ubuntu-core" ; then
         echo "remote.refresh: this function can be used just with ubuntu core systems"
         return 1
