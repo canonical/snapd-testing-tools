@@ -37,6 +37,7 @@ check_waiting_for_reboot() {
 }
 
 check_ready_to_refresh() {
+    remote.wait-for refresh
     if check_waiting_for_reboot; then
         echo "remote.refresh: waiting for system reboot"
         remote.wait-for reboot
@@ -78,7 +79,7 @@ refresh_kernel() {
     local refresh_channel=$1
     local snap_name
 
-    check_ubuntu_core
+    echo "remote.refresh: starting kernel refresh process"
     snap_name="$(remote.exec "snap list" | grep -E '(kernel$|kernel,)' | awk '{ print $1 }')"
     if [ -z "$snap_name" ]; then
         echo "remote.refresh: no kernel snap to update"
@@ -92,7 +93,7 @@ refresh_gadget() {
     local refresh_channel=$1
     local snap_name
 
-    check_ubuntu_core
+    echo "remote.refresh: starting gadget refresh process"
     snap_name="$(remote.exec "snap list" | grep -E '(gadget$|gadget,)' | awk '{ print $1 }')"
     if [ -z "$snap_name" ]; then
         echo "remote.refresh: no gadget snap to update"
@@ -106,6 +107,7 @@ refresh_snapd() {
     local refresh_channel=$1
     local snap_name
 
+    echo "remote.refresh: starting snapd refresh process"
     snap_name="$(remote.exec "snap list" | grep -E '^snapd.*(snapd$|snapd,)' | awk '{ print $1 }')"
     if [ -z "$snap_name" ]; then
         echo "remote.refresh: no snapd snap to update"
@@ -119,6 +121,7 @@ refresh_core() {
     local refresh_channel=$1
     local snap_name
 
+    echo "remote.refresh: starting core refresh process"
     snap_name="$(remote.exec "snap list" | grep -E '^core.*(core$|core,)' | awk '{ print $1 }')"
     if [ -z "$snap_name" ]; then
         echo "remote.refresh: no core snap to update"
@@ -132,6 +135,7 @@ refresh_core_base() {
     local refresh_channel=$1
     local base_line snap_name core_channel
 
+    echo "remote.refresh: starting core base refresh process"
     if ! base_line="$(remote.exec "snap list | grep -E '^core.* (base$|base,)'")"; then
         echo "remote.refresh: no core base snap to update"
         return 0
@@ -236,14 +240,6 @@ snap_refresh() {
             refresh_snap "$snapname" "$channel"
             ;;
     esac
-}
-
-check_ubuntu_core() {
-    remote.wait-for ssh
-    if ! remote.exec "cat /etc/os-release" | grep -q "ID=ubuntu-core" ; then
-        echo "remote.refresh: this function can be used just with ubuntu core systems"
-        return 1
-    fi
 }
 
 main() {
