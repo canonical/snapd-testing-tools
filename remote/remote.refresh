@@ -15,21 +15,22 @@ check_refresh_after_reboot() {
     local refresh_channel=$1
     local snap=$2
 
-    echo "remote.refresh: checking snap refresh after reboot"
-    remote.wait-for no-ssh -n 60 --wait 2
-    remote.wait-for ssh -n 120 --wait 2
+    echo "remote.refresh: checking snap \"$snap\" refresh after reboot"
+    remote.wait-for reboot
     remote.wait-for snap-command
     remote.retry -n 10 --wait 2  "snap info $snap | grep -q -E \"tracking: +(latest/${refresh_channel}|${refresh_channel})\""
+    echo "remote.refresh: snap \"$snap\" refreshed correctly"
 }
 
 check_refresh() {
     local refresh_channel=$1
     local snap=$2
 
-    echo "remote.refresh: checking snap refresh with no reboot"
+    echo "remote.refresh: checking snap \"$snap\" refresh with no reboot"
     remote.wait-for ssh -n 60 --wait 2
     remote.wait-for snap-command
     remote.retry -n 10 --wait 2  "snap info $snap | grep -q -E \"tracking: +(latest/${refresh_channel}|${refresh_channel})\""
+    echo "remote.refresh: snap \"$snap\" refreshed correctly"
 }
 
 check_waiting_for_reboot() {
@@ -179,6 +180,9 @@ get_boot_id() {
 
 full_refresh() {
     echo "remote.refresh: starting full refresh"
+
+    check_ready_to_refresh
+    refresh_all
 
     check_ready_to_refresh
     refresh_core

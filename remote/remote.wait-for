@@ -166,7 +166,7 @@ wait_for_refresh(){
         echo ""
 
         if ! remote.exec "true" &>/dev/null; then
-            wait_for_ssh -n 120 --wait 5
+            wait_for_ssh
         fi
 
         if remote.exec "snap changes" | grep -Eq "$change_id.*Doing.*(Auto-refresh|Refresh)"; then
