@@ -15,6 +15,7 @@ check_refresh_after_reboot() {
     local refresh_channel=$1
     local snap=$2
 
+    echo "remote.refresh: checking snap refresh after reboot"
     remote.wait-for no-ssh -n 60 --wait 2
     remote.wait-for ssh -n 120 --wait 2
     remote.wait-for snap-command
@@ -25,15 +26,30 @@ check_refresh() {
     local refresh_channel=$1
     local snap=$2
 
+    echo "remote.refresh: checking snap refresh with no reboot"
     remote.wait-for ssh -n 60 --wait 2
     remote.wait-for snap-command
     remote.retry -n 10 --wait 2  "snap info $snap | grep -q -E \"tracking: +(latest/${refresh_channel}|${refresh_channel})\""
+}
+
+check_waiting_for_reboot() {
+    remote.exec "sudo journalctl -n 30 -u snapd" | grep -q "Waiting for system reboot"
+}
+
+check_ready_to_refresh() {
+    if check_waiting_for_reboot; then
+        echo "remote.refresh: waiting for system reboot"
+        remote.wait-for reboot
+    fi
+    remote.wait-for auto-refresh
+    remote.wait-for refresh
 }
 
 do_refresh() {
     local snap_name=$1
     local refresh_channel=$2
 
+    echo "remote.refresh: triggering refresh for snap \"$snap_name\" on channel \"$refresh_channel\""
     output=$(remote.exec "sudo snap refresh --channel ${refresh_channel} $snap_name 2>&1" || echo "snapd is about to reboot the system")
     if echo "$output" | grep -E "(no updates available|cannot refresh \"$snap_name\"|is not installed)"; then
         echo "remote.refresh: snap \"$snap_name\" has no updates available"
@@ -160,21 +176,24 @@ get_boot_id() {
 }
 
 full_refresh() {
-    remote.wait-for auto-refresh
-    remote.wait-for refresh
+    echo "remote.refresh: starting full refresh"
+
+    check_ready_to_refresh
     refresh_core
-    remote.wait-for auto-refresh
-    remote.wait-for refresh
+
+    check_ready_to_refresh
     refresh_core_base
-    remote.wait-for auto-refresh
-    remote.wait-for refresh
+
+    check_ready_to_refresh
     refresh_snapd
-    remote.wait-for auto-refresh
-    remote.wait-for refresh
+
+    check_ready_to_refresh
     refresh_kernel
-    remote.wait-for refresh
+
+    check_ready_to_refresh
     refresh_all
-    remote.wait-for refresh
+
+    check_ready_to_refresh
 }
 
 snap_refresh() {
@@ -221,7 +240,7 @@ snap_refresh() {
 }
 
 check_ubuntu_core() {
-    if ! remote.exec "cat /etc/os-release | grep ID=ubuntu-core"; then
+    if ! remote.exec "cat /etc/os-release" | grep -q "ID=ubuntu-core" ; then
         echo "remote.refresh: this function can be used just with ubuntu core systems"
         return 1
     fi

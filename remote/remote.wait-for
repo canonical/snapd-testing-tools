@@ -68,6 +68,12 @@ get_boot_id() {
     remote.exec "cat /proc/sys/kernel/random/boot_id"
 }
 
+wait_for_reconnect_ssh() {
+    echo "remote.wait-for: waiting for ssh is recoonected"
+    wait_for_no_ssh
+    wait_for_ssh
+}
+
 wait_for_reboot() {
     local attempts=$1
     local wait=$2
@@ -78,7 +84,8 @@ wait_for_reboot() {
 
     if [ -z "$initial_boot_id" ]; then
         echo "remote.wait-for: initial boot id not set"
-        return 1
+        wait_for_reconnect_ssh
+        return
     fi
 
     while [ $attempts -ge 0 ]; do
