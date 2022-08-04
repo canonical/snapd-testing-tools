@@ -38,6 +38,7 @@ check_waiting_for_reboot() {
 }
 
 check_ready_to_refresh() {
+    remote.wait-for ssh
     if check_waiting_for_reboot; then
         echo "remote.refresh: waiting for system reboot"
         remote.wait-for reboot
