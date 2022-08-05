@@ -179,11 +179,54 @@ get_boot_id() {
     remote.exec "cat /proc/sys/kernel/random/boot_id"
 }
 
+prevent_autorefresh() {
+    remote.wait-for ssh
+    state_path="$(remote.exec 'find /writable -name state.json 2>/dev/null' || true)"
+    if [ -z "$state_path" ]; then
+        echo "remote.refresh: state file not found in writable"
+        state_path="$(remote.exec 'find / -name state.json 2>/dev/null' || true)"
+    fi
+    if [ -z "$state_path" ]; then
+        echo "remote.refresh: state.json file not found"
+        exit 1
+    fi
+
+    remote.exec "sudo cp $state_path /tmp/state.json"
+    remote.exec "sudo chmod 644 /tmp/state.json"
+    remote.pull /tmp/state.json state.json
+    echo "remote.refresh: state file retrieved"
+
+    jq ".data[\"last-refresh\"] = \"$(date +%Y-%m-%dT%H:%M:%S%:z)\"" state.json > state.json.new
+    echo "remote.refresh: state file just updated"
+
+    remote.push state.json.new /tmp/state.json.new
+    remote.exec "sudo cp /tmp/state.json.new $state_path"
+    remote.exec "sudo chmod 600 $state_path"
+    echo "remote.refresh: updated state file restored"
+    rm -f state.json state.json.new
+}
+
+disable_refreshes() {
+    if ! command -v jq &>/dev/null; then
+        snap install --devmode jq
+    fi
+
+    echo "remote.refresh: modifying state to make it look like the last refresh just happened"
+    remote.exec "sudo systemctl stop snapd.socket snapd.service"
+    prevent_autorefresh
+    remote.exec "sudo systemctl start snapd.socket snapd.service"
+
+    echo "remote.refresh: minimizing risk of hitting refresh schedule"
+    remote.exec "sudo snap set core refresh.schedule=00:00-23:59"
+    remote.exec "sudo snap refresh --time --abs-time" | grep -Eq "last: 2[0-9]{3}"
+
+}
+
 full_refresh() {
     echo "remote.refresh: starting full refresh"
 
     check_ready_to_refresh
-    refresh_all
+    disable_refreshes
 
     check_ready_to_refresh
     refresh_core
