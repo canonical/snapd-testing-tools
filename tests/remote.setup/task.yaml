@@ -23,7 +23,8 @@ execute: |
     remote.setup get-config-path | MATCH "$(pwd)/remote.setup.cfg"
 
     # check using another config file
-    export REMOTE_CFG_FILE="$(pwd)/remote.newsetup.cfg"
+    REMOTE_CFG_FILE="$(pwd)/remote.newsetup.cfg"
+    export REMOTE_CFG_FILE
     remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-pass-1
     remote.setup get-config-path | MATCH "$(pwd)/remote.newsetup.cfg"
 
