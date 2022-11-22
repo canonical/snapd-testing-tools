@@ -6,6 +6,7 @@ The input is a directory which is scanned recursively and all
 the task.yaml files are check
 """
 
+
 import argparse
 import glob
 import os
