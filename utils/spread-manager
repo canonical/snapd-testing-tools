@@ -5,7 +5,7 @@ show_help() {
     echo "       spread-manager unset-manual [--project-path <PROJECT-PATH>] <TEST-PATH...>"
     echo "       spread-manager reset-manual [--project-path <PROJECT-PATH>] <TEST-PATH...>"
     echo ""
-    echo "Tool used to help with functions that are not already implemented in spread"
+    echo "Tool used to help with functions that are not already implemented in spreads"
 }
 
 _check_project_path() {
