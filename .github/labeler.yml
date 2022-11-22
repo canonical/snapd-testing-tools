@@ -1,0 +1,4 @@
+# Add 'Needs Tests' label to either any change on remote, tools or utils dir
+Needs Tests:
+  - any: ["remote/**/*", "tools/**/*", "utils/**/*"]
+
