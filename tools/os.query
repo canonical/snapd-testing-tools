@@ -60,6 +60,16 @@ is_core22() {
     fi
 }
 
+is_core24() {
+    # We need to check $SPREAD_SYSTEM var because in snapd the os-release file does
+    # not contain the ubuntu-core info while the system is being prepared
+    if [ -n "$SPREAD_SYSTEM" ]; then
+        [[ "$SPREAD_SYSTEM" == ubuntu-core-24-* ]]
+    else
+        grep -qFx 'ID=ubuntu-core' /etc/os-release && grep -qFx 'VERSION_ID="24"' /etc/os-release
+    fi
+}
+
 is_classic() {
     ! is_core
 }
