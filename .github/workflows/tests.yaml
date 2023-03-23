@@ -40,7 +40,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get previous cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache@v3
       with:
         path: "${{ github.workspace }}/.test-results"
         key: "${{ github.job }}-results-${{ github.run_id }}-${{ github.run_attempt }}"
