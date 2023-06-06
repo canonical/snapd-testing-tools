@@ -37,8 +37,20 @@ remap_one() {
 }
 
 cmd_install() {
-    # shellcheck disable=SC2068
-    pacman -S --noconfirm $@
+    local PACMAN_FLAGS="--noconfirm"
+    while [ -n "$1" ]; do
+        case "$1" in
+            --no-install-recommends)
+                # Pacman only ever installs the required dependencies
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+    # shellcheck disable=SC2068,SC2086
+    pacman -S $PACMAN_FLAGS $@
 }
 
 cmd_is_installed() {
