@@ -172,14 +172,16 @@ wait_for_refresh(){
             wait_for_ssh "$DEFAULT_WAIT_FOR_SSH_ATTEMPTS" "$DEFAULT_WAIT_FOR_SSH_WAIT"
         fi
 
-        if remote.exec "snap changes" | grep -Eq "$change_id.*Doing.*(Auto-refresh|Refresh)"; then
+        changes="$(remote.exec 'snap changes')"
+        if echo "$changes" | grep -Eq "$change_id.*Doing.*(Auto-refresh|Refresh)"; then
             echo "remote.wait-for: still doing refresh, exiting"
-        elif remote.exec "snap changes" | grep -Eq "$change_id.*Error.*(Auto-refresh|Refresh)"; then
+        elif echo "$changes" | grep -Eq "$change_id.*Error.*(Auto-refresh|Refresh)"; then
             echo "remote.wait-for: refresh failed"
-        elif remote.exec "snap changes" | grep -Eq "$change_id.*Done.*(Auto-refresh|Refresh)"; then
+        elif echo "$changes" | grep -Eq "$change_id.*Done.*(Auto-refresh|Refresh)"; then
             echo "remote.wait-for: refresh completed"
         else
             echo "remote.wait-for: refresh results unknown"
+            echo "$changes"
             return 1
         fi
     else
