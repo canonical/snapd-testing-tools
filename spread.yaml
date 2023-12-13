@@ -52,15 +52,6 @@ backends:
                   storage: 20G
                   workers: 1
 
-    openstack:
-        plan: cpu1-ram4-disk10
-        halt-timeout: 2h
-        systems:
-            - ubuntu-20.04-64:
-                image: ubuntu/ubuntu-focal-20.04-amd64-server-20231129-disk1.img
-                workers: 1
-
-
 path: /root/snapd-testing-tools
 
 kill-timeout: 10m
