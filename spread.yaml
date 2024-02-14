@@ -18,7 +18,6 @@ backends:
                 location: us-east1-a
             - ubuntu-22.04-64:
                 location: us-west1-a
-            - ubuntu-23.04-64:
             - ubuntu-23.10-64:
             - ubuntu-24.04-64:
             - debian-11-64:
