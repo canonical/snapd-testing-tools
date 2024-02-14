@@ -1,6 +1,6 @@
 summary: Smoke test for tests.pkgs tool
 
-backends: [google]
+backends: [google, testflinger]
 
 execute: |
     if os.query is-core; then

@@ -15,7 +15,9 @@ backends:
             - ubuntu-18.04-32:
             - ubuntu-18.04-64:
             - ubuntu-20.04-64:
+                location: us-east1-a
             - ubuntu-22.04-64:
+                location: us-west1-a
             - ubuntu-23.04-64:
             - ubuntu-23.10-64:
             - ubuntu-24.04-64:
@@ -52,6 +54,37 @@ backends:
                   storage: 20G
                   workers: 1
 
+    testflinger:
+        halt-timeout: 1m
+        wait-timeout: 1h
+        warn-timeout: 5m
+        kill-timeout: 2h
+        systems:
+            - ubuntu-core-20-rpi3:
+                  queue: rpi3b
+                  image: https://storage.googleapis.com/snapd-spread-tests/images/pi3-20-stable-snapd_beta/pi.img.xz
+                  workers: 1
+                  username: ubuntu
+                  password: ubuntu
+            - ubuntu-core-20-rpi4:
+                  queue: rpi4b
+                  image: https://storage.googleapis.com/snapd-spread-tests/images/pi4-20-stable-snapd_beta/pi.img.xz
+                  workers: 1
+                  username: ubuntu
+                  password: ubuntu
+            - ubuntu-core-22-rpi3:
+                  queue: rpi3b
+                  image: https://storage.googleapis.com/snapd-spread-tests/images/pi3-22-stable-snapd_beta/pi.img.xz
+                  workers: 1
+                  username: ubuntu
+                  password: ubuntu
+            - ubuntu-core-22-rpi4:
+                  queue: rpi4b
+                  image: https://storage.googleapis.com/snapd-spread-tests/images/pi4-22-stable-snapd_beta/pi.img.xz
+                  workers: 1
+                  username: ubuntu
+                  password: ubuntu
+
 path: /root/snapd-testing-tools
 
 kill-timeout: 10m
@@ -70,9 +103,14 @@ suites:
         prepare: |
             echo "Preparing snapd-testing-tools main suite"
             # Create users for the tests
-            useradd -m tools-user-1
+            if [[ "$SPREAD_SYSTEM" == ubuntu-core-* ]]; then
+                adduser --extrausers --quiet --disabled-password --gecos '' tools-user-1
+                adduser --extrausers --quiet --disabled-password --gecos '' tools-user-2
+            else
+                useradd -m tools-user-1
+                useradd -m tools-user-2
+            fi
             echo tools-user-1:tools-user-1 | sudo chpasswd
-            useradd -m tools-user-2
             echo tools-user-2:tools-user-2 | sudo chpasswd
         restore: |
             echo "Restoring snapd-testing-tools main suite"

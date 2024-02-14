@@ -1,6 +1,6 @@
 summary: smoke test for the tests.systemd tool
 
-backends: [google]
+backends: [google, testflinger]
 
 systems: [-ubuntu-14.04-64]
 

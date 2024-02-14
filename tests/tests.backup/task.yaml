@@ -1,6 +1,6 @@
 summary: tests for the tests.backup tool
 
-backends: [google]
+backends: [google, testflinger]
 
 execute: |
     # Without any arguments a help message is printed.

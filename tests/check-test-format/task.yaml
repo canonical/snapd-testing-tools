@@ -1,6 +1,6 @@
 summary: smoke test for the spread checker tool
 
-backends: [google]
+backends: [google, testflinger]
 
 systems: [ ubuntu-20.04-64 ]
 

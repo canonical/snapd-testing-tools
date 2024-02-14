@@ -1,6 +1,6 @@
 summary: smoke test for the os.paths tool
 
-backends: [google]
+backends: [google, testflinger]
 
 execute: |
     os.paths --help | MATCH 'usage: os.paths snap-mount-dir, media-dir, libexec-dir'

@@ -1,6 +1,6 @@
 summary: integration tests for log-analyzer tool
 
-backends: [google]
+backends: [google, testflinger]
 
 # Github actions agents are just running ubuntu jammy
 systems: [ubuntu-22.04-64]

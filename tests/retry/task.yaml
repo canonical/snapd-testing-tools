@@ -1,6 +1,6 @@
 summary: smoke test for the retry tool
 
-backends: [google]
+backends: [google, testflinger]
 
 execute: |
     # Retry runs the command that was passed as argument and returns the exit

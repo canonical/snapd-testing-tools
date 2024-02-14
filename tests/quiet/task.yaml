@@ -1,6 +1,6 @@
 summary: test for the quiet tool
 
-backends: [google]
+backends: [google, testflinger]
 
 execute: |
     quiet echo test | NOMATCH test

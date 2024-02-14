@@ -1,6 +1,6 @@
 summary: test for the not tool
 
-backends: [google]
+backends: [google, testflinger]
 
 execute: |
     not false && echo test | MATCH test
