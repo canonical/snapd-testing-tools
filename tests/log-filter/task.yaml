@@ -15,7 +15,7 @@ prepare: |
     tar -xf spread-log-filter.tar.xz
 
 restore: |
-    rm -rf spread-log-filter.tar.xz *.log
+    rm -rf spread-log-filter.tar.xz ./*.log
 
 execute: |
     log-filter --help | MATCH 'usage: log-filter \[-h\] \[-o PATH\]'
