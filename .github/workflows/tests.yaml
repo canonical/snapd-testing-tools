@@ -86,7 +86,7 @@ jobs:
               RUN_TESTS="$FAILED_TESTS"
           fi
 
-          (set -o pipefail; spread $RUN_TESTS | tee spread.log)
+          (set -o pipefail; spread $RUN_TESTS | ./utils/log-filter -e 'Debug' -e 'WARNING:' -f 'Failed=NO_LINES' -f 'Error=NO_LINES' | tee spread.log)
 
     - name: Discard spread workers
       if: always()
