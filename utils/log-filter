@@ -194,7 +194,7 @@ When a output file is not provided the debug output is sent to spread_filtered.l
         "-o",
         "--output-file", 
         metavar="PATH",
-        default="spread_filtered.log",
+        default="spread.filtered.log",
         help="path to the filtered output file"
     )
     parser.add_argument(
