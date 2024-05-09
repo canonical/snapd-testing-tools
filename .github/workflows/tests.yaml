@@ -85,8 +85,8 @@ jobs:
           if [ -n "$FAILED_TESTS" ]; then
               RUN_TESTS="$FAILED_TESTS"
           fi
-          # The filter parameters are used to filter the spread logs to be stored
-          FILTER_PARAMS="-e 'Debug' -e 'WARNING:' -f 'Failed=NO_LINES' -f 'Error=NO_LINES'"
+          # The log-filter tool is used to filter the spread logs to be stored
+          FILTER_PARAMS="-e Debug -e WARNING: -f Failed=NO_LINES -f Error=NO_LINES"
 
           (set -o pipefail; spread $RUN_TESTS | ./utils/log-filter $FILTER_PARAMS | tee spread.log)
 
