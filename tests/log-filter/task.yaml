@@ -23,29 +23,29 @@ execute: |
 
     # Run the tool for a real log    
     # The output should:
-    # 1. the output should go to filtered.log file
+    # 1. the output should go to test.filtered.log file
     # 2. exclude: Preparing, Restoring, Error, Warning
     # 3. show: debug lines with ###DEBUG
     # 4. show: failed tests for google-nested
-    log-filter -o filtered.log -e Error -e Restoring -e Preparing -f "Debug=###DEBUG" -f "Failed=google-nested:" < spread-log-filter.log > output.log
+    log-filter -o test.filtered.log -e Error -e Restoring -e Preparing -f "Debug=###DEBUG" -f "Failed=google-nested:" < spread-log-filter.log > output.log
 
     # Check the stdout is the same than the stdin
     diff -Z spread-log-filter.log output.log
 
     # Check exclude
-    test "$(grep -c Restoring filtered.log)" -eq 0
-    test "$(grep -c Preparing filtered.log)" -eq 0
-    test "$(grep -c Error filtered.log)" -eq 0
+    test "$(grep -c Restoring test.filtered.log)" -eq 0
+    test "$(grep -c Preparing test.filtered.log)" -eq 0
+    test "$(grep -c Error test.filtered.log)" -eq 0
 
     # Check the non excluded
-    test "$(grep -c 'Debug output' filtered.log)" -eq "$(grep -c 'Debug output' spread-log-filter.log)"
+    test "$(grep -c 'Debug output' test.filtered.log)" -eq "$(grep -c 'Debug output' spread-log-filter.log)"
 
     # Check the filters
-    test "$(grep -c '###DEBUG' filtered.log)" -eq "$(grep -c '###DEBUG' spread-log-filter.log)"
-    grep -A 1 'Failed suite prepare: 4' filtered.log | MATCH 'Failed suite restore: 1'
+    test "$(grep -c '###DEBUG' test.filtered.log)" -eq "$(grep -c '###DEBUG' spread-log-filter.log)"
+    grep -A 1 'Failed suite prepare: 4' test.filtered.log | MATCH 'Failed suite restore: 1'
 
     # Check no repeated
-    test "$(grep -c 'Failed suite prepare: 4' filtered.log)" -eq 1
-    test "$(grep -c 'Executing' filtered.log)" -eq "$(grep -c 'Executing' spread-log-filter.log)"
-    test "$(grep -c 'Aborted tasks' filtered.log)" -eq 1
+    test "$(grep -c 'Failed suite prepare: 4' test.filtered.log)" -eq 1
+    test "$(grep -c 'Executing' test.filtered.log)" -eq "$(grep -c 'Executing' spread-log-filter.log)"
+    test "$(grep -c 'Aborted tasks' test.filtered.log)" -eq 1
 

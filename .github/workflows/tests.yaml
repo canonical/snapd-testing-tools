@@ -86,7 +86,7 @@ jobs:
               RUN_TESTS="$FAILED_TESTS"
           fi
           # The log-filter tool is used to filter the spread logs to be stored
-          FILTER_PARAMS="-e Debug -e WARNING: -f Failed=NO_LINES -f Error=NO_LINES"
+          FILTER_PARAMS="-o spread_${{ github.event.number }}.filtered.log -e Debug -e WARNING: -f Failed=NO_LINES -f Error=NO_LINES"
 
           (set -o pipefail; spread $RUN_TESTS | ./utils/log-filter $FILTER_PARAMS | tee spread.log)
 
