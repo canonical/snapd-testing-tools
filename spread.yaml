@@ -30,8 +30,6 @@ backends:
                 storage: preserve-size
             - centos-7-64:
                 storage: preserve-size
-            - centos-8-64:
-                storage: preserve-size
             - centos-9-64:
                 storage: preserve-size
             - opensuse-15.5-64:
