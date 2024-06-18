@@ -48,6 +48,23 @@ backends:
                   storage: 20G
                   workers: 1
 
+    openstack:
+        key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
+        plan: staging-cpu2-ram4-disk50
+        halt-timeout: 2h
+        groups: [default]
+        environment:
+            HTTP_PROXY: 'http://squid.internal:3128'
+            HTTPS_PROXY: 'http://squid.internal:3128'
+            http_proxy: 'http://squid.internal:3128'
+            https_proxy: 'http://squid.internal:3128'
+        systems:
+            - fedora-40-64:
+                image: fedora-40-64
+                workers: 1
+   
+
+
 path: /root/snapd-testing-tools
 
 kill-timeout: 10m
