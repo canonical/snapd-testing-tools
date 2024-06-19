@@ -46,7 +46,6 @@ backends:
             - ubuntu-20.04-64:
                   image: ubuntu-2004-64-virt-enabled
                   storage: 20G
-                  workers: 1
 
     openstack:
         key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
@@ -56,14 +55,16 @@ backends:
         environment:
             HTTP_PROXY: 'http://squid.internal:3128'
             HTTPS_PROXY: 'http://squid.internal:3128'
-            http_proxy: 'http://squid.internal:3128'
-            https_proxy: 'http://squid.internal:3128'
+            NO_PROXY: 'canonical.com'
         systems:
+            - ubuntu-20.04-64:
+                image: ubuntu-focal-20.04-amd64
+            - ubuntu-22.04-64:
+                image: ubuntu-jammy-22.04-amd64
+            - centos-9-64:
+            - debian-12-64:
             - fedora-40-64:
-                image: fedora-40-64
-                workers: 1
-   
-
+            - opensuse-15.5-64:
 
 path: /root/snapd-testing-tools
 
