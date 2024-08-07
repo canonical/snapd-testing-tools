@@ -23,11 +23,9 @@ class ExecutionRule:
 
 
 class ExecutionRules:
-    def __init__(self, rules_map: dict[str, dict[str, dict[str, list[str]]]]):
+    def __init__(self, rules: list[ExecutionRule]):
         self.rules = []
-        rules = list(rules_map["rules"].values())
-        for rule in rules:
-            self.rules.append(ExecutionRule(rule.get("from", []), rule.get("to", [])))
+        self.rules = rules
 
     def calc_executions(self, change: str) -> list[str]:
         for rule in self.rules:
@@ -50,7 +48,16 @@ class ExecutionManager:
         self.backend = backend
         with open(rules_file) as f:
             rules_map = yaml.safe_load(f)
-        self.rules = ExecutionRules(rules_map)
+        self.rules = ExecutionRules(self.from_rules_map(rules_map))
+
+    @classmethod
+    def from_rules_map(
+        cls, rules_map: dict[str, dict[str, dict[str, list[str]]]]
+    ) -> list[ExecutionRule]:
+        return [
+            ExecutionRule(r.get("from", []), r.get("to", []))
+            for r in rules_map["rules"].values()
+        ]
 
     def _is_test_dir(self, change_dir: str) -> bool:
         return os.path.isfile(os.path.join(change_dir, self.TASK))
@@ -76,7 +83,6 @@ class ExecutionManager:
 
         # if the change is a directory which has changed
         if os.path.isdir(change_path):
-            # if
             if self._is_test_dir(change_path):
                 return self._get_test_exec_dir(change_path)
             else:
