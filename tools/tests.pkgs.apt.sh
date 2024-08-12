@@ -60,5 +60,8 @@ cmd_list_installed() {
 }
 
 cmd_remove() {
-    apt-get remove --yes "$@"
+    # Allow removing essential packages, that may get installed when using i386
+    # packages on amd64 system. Normally they would be really essential but in
+    # this case they are not really as essential.
+    apt-get remove --yes --allow-remove-essential "$@"
 }
