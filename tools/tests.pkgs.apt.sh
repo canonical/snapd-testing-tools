@@ -56,7 +56,7 @@ cmd_query() {
 }
 
 cmd_list_installed() {
-    apt list --installed | cut -d/ -f1 | sort
+    apt list --installed | cut -d ' ' -f 1,3 | sed -e 's@/.*\s@:@g' | sort
 }
 
 cmd_remove() {
