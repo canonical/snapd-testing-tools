@@ -43,8 +43,8 @@ cmd_install() {
                 ;;
         esac
     done
-    # shellcheck disable=SC2068,SC2086
-    apt-get install $APT_FLAGS $@
+    # shellcheck disable=SC2086
+    apt-get install $APT_FLAGS "$@"
 }
 
 cmd_is_installed() {
@@ -60,6 +60,5 @@ cmd_list_installed() {
 }
 
 cmd_remove() {
-    # shellcheck disable=SC2068
-    apt-get remove --yes $@
+    apt-get remove --yes "$@"
 }
