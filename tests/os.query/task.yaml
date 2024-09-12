@@ -148,6 +148,12 @@ execute: |
             os.query is-classic
             ! os.query is-core
             ;;
+        opensuse-15.6-64)
+            os.query is-opensuse
+            os.query is-opensuse 15.6
+            os.query is-classic
+            ! os.query is-core
+            ;;
         opensuse-tumbleweed-64)
             os.query is-opensuse
             os.query is-opensuse tumbleweed
