@@ -51,9 +51,9 @@ execute: |
     if not os.query is-trusty; then
         tests.pkgs download curl
         if os.query is-opensuse; then
-            find . -maxdepth 4 -name curl.*
+            find . -maxdepth 4 -name 'curl.*'
         else
-            find . -maxdepth 1 -name curl.*
+            find . -maxdepth 1 -name 'curl.*'
         fi
     fi
 
