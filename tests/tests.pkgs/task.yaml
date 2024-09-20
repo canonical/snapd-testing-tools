@@ -48,14 +48,14 @@ execute: |
     not tests.pkgs is-installed test-snapd-pkg-2
 
     # Download 2 packages, trusty does not support apt download
-    PKG1=grep
-    PKG2=curl
+    PKG1="grep"
+    PKG2="curl"
     MAXDEPTH=1
     if os.query is-opensuse; then
         MAXDEPTH=4
     fi
     if os.query is-arch-linux || os.query is-fedora || os.query is-opensuse; then
-        PKG2=vi
+        PKG2="vi"
     fi
 
     if not os.query is-trusty; then
