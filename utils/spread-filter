@@ -14,12 +14,12 @@ class ExecutionRule:
         for regex in from_list:
             self.regex_list.append(re.compile(regex))
 
-    def match(self, path: str) -> list[str]:
+    def match(self, path: str) -> tuple[bool, list[str]]:
         for regex in self.regex_list:
             if regex.match(path):
-                return self.to
+                return True, self.to
 
-        return []
+        return False, []
 
 
 class ExecutionRules:
@@ -29,8 +29,8 @@ class ExecutionRules:
 
     def calc_executions(self, change: str) -> list[str]:
         for rule in self.rules:
-            match = rule.match(change)
-            if match != []:
+            found, match = rule.match(change)
+            if found:
                 return match
 
         return []
