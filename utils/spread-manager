@@ -46,11 +46,11 @@ _check_test_path() {
         exit 1
     fi
     if [ ! -d "${project_path}/${test_path}" ]; then
-        echo "spread-manager: test path \"$test_path\" has to be a directory"
+        echo "spread-manager: test path \"${project_path}/${test_path}\" has to be a directory"
         exit 1
     fi
     if [ ! -f "${project_path}/${test_path}/task.yaml" ]; then
-        echo "spread-manager: test task \"$test_path/task.yaml\" does not exist"
+        echo "spread-manager: test task \"${project_path}/${test_path}/task.yaml\" does not exist"
         exit 1
     fi
 }
