@@ -104,23 +104,16 @@ execute: |
             os.query is-classic
             ! os.query is-core
             ;;
-        fedora-39-64)
-            os.query is-fedora
-            os.query is-fedora 39
-            ! os.query is-fedora rawhide
-            os.query is-classic
-            ! os.query is-core
-            ;;
-        fedora-40-64)
-            os.query is-fedora
-            os.query is-fedora 40
-            ! os.query is-fedora rawhide
-            os.query is-classic
-            ! os.query is-core
-            ;;
         fedora-41-64)
             os.query is-fedora
             os.query is-fedora 41
+            ! os.query is-fedora rawhide
+            os.query is-classic
+            ! os.query is-core
+            ;;
+        fedora-42-64)
+            os.query is-fedora
+            os.query is-fedora 42
             ! os.query is-fedora rawhide
             os.query is-classic
             ! os.query is-core
