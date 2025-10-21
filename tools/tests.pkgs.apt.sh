@@ -27,8 +27,10 @@ remap_one() {
                 echo cpp:i386
             elif os.query is-xenial || os.query is-bionic; then
                 echo cpp-5:i386
-            else
+            elif os.query is-jammy || os.query is-focal || os.query is-noble; then
                 echo cpp-9:i386
+            else
+                echo cpp-11:i386
             fi
             ;;
         *)
