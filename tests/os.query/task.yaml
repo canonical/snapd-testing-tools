@@ -167,6 +167,13 @@ execute: |
             os.query is-kernel-ge "$(uname -r)"
             os.query is-kernel-le "$(uname -r)"
             ;;
+        ubuntu-26.04-64)
+            os.query is-resolute
+            os.query is-classic
+            os.query is-ubuntu 26.04
+            ! os.query is-ubuntu 20.04
+            ! os.query is-core
+            ;;
         debian-11-64)
             os.query is-debian
             os.query is-debian 11
