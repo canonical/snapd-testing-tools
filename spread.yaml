@@ -45,8 +45,8 @@ backends:
                   storage: 20G
 
     openstack:
-        key: '$(HOST: echo "$OS_CREDENTIALS_AMD64_PS6")'
-        plan: staging-cpu2-ram4-disk20
+        key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
+        plan: shared.xsmall
         halt-timeout: 2h
         groups: [default]
         environment:
@@ -54,6 +54,19 @@ backends:
             HTTPS_PROXY: 'http://squid.internal:3128'
             NO_PROXY: 'canonical.com'
         systems:
+            - ubuntu-16.04-64:
+                image: snapd-spread/ubuntu-16.04-64
+            - ubuntu-18.04-64:
+                image: snapd-spread/ubuntu-18.04-64
+            - ubuntu-20.04-64:
+                image: snapd-spread/ubuntu-20.04-64
+            - ubuntu-22.04-64:
+                image: snapd-spread/ubuntu-22.04-64
+            - ubuntu-24.04-64:
+                image: snapd-spread/ubuntu-24.04-64
+            - ubuntu-26.04-64:
+                image: snapd-spread/ubuntu-26.04-64
+
             - fedora-41-64:
                 image: snapd-spread/fedora-41-64
             - fedora-42-64:
@@ -67,62 +80,7 @@ backends:
             - debian-sid-64:
                 image: snapd-spread/debian-sid-64
 
-    openstack-s390x:
-        type: openstack
-        key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
-        plan: builder-s390x-cpu2-ram4-disk20
-        halt-timeout: 2h
-        wait-timeout: 15m
-        groups: [default]
-        environment:
-            HTTP_PROXY: 'http://squid.internal:3128'
-            HTTPS_PROXY: 'http://squid.internal:3128'
-            NO_PROXY: 'canonical.com'
-        systems:
-            - ubuntu-22.04-64:
-                image: auto-sync/ubuntu-jammy-22.04-s390x-server-20250327-disk1.img
-            - ubuntu-24.04-64:
-                image: auto-sync/ubuntu-noble-24.04-s390x-server-20250403-disk1.img
-
-    openstack-ppc64el:
-        type: openstack
-        key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
-        plan: builder-ppc64el-cpu2-ram4-disk20
-        kill-timeout: 5m
-        wait-timeout: 5m
-        groups: [default]
-        environment:
-            HTTP_PROXY: 'http://squid.internal:3128'
-            HTTPS_PROXY: 'http://squid.internal:3128'
-            NO_PROXY: 'canonical.com'
-        systems:
-            - ubuntu-22.04-64:
-                image: auto-sync/ubuntu-jammy-22.04-ppc64el-server-20250327-disk1.img
-            - ubuntu-24.04-64:
-                image: auto-sync/ubuntu-noble-24.04-ppc64el-server-20250403-disk1.img
-            - ubuntu-24.04-64-large:
-                image: auto-sync/ubuntu-noble-24.04-ppc64el-server-20250403-disk1.img
-                plan: builder-ppc64el-cpu8-ram16-disk50
-
-    openstack-ps7:
-        type: openstack
-        key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
-        plan: shared.xsmall
-        halt-timeout: 2h
-        groups: [default]
-        environment:
-            HTTP_PROXY: 'http://squid.internal:3128'
-            HTTPS_PROXY: 'http://squid.internal:3128'
-            NO_PROXY: 'canonical.com'
-        systems:
-            - ubuntu-22.04-64:
-                image: auto-sync/ubuntu-jammy-22.04-amd64-server-20250429-disk1.img
-            - ubuntu-24.04-64:
-                image: auto-sync/ubuntu-noble-24.04-amd64-server-20250430-disk1.img
-            - ubuntu-25.04-64:
-                image: auto-sync/ubuntu-plucky-25.04-amd64-server-20250424-disk1.img
-
-    openstack-ps7-arm64:
+    openstack-arm64:
         type: openstack
         key: '$(HOST: echo "$SPREAD_OPENSTACK_ENV")'
         plan: shared.xsmall.arm64
@@ -133,13 +91,14 @@ backends:
             HTTPS_PROXY: 'http://squid.internal:3128'
             NO_PROXY: 'canonical.com'
         systems:
-            - ubuntu-22.04-64:
-                image: auto-sync/ubuntu-jammy-22.04-arm64-server-20250429-disk1.img
-            - ubuntu-24.04-64:
-                image: auto-sync/ubuntu-noble-24.04-arm64-server-20250430-disk1.img
-            - ubuntu-25.04-64:
-                image: auto-sync/ubuntu-plucky-25.04-arm64-server-20250424-disk1.img
-
+            - ubuntu-20.04-arm-64:
+                image: snapd-spread/ubuntu-20.04-arm-64
+            - ubuntu-22.04-arm-64:
+                image: snapd-spread/ubuntu-22.04-arm-64
+            - ubuntu-24.04-arm-64:
+                image: snapd-spread/ubuntu-24.04-arm-64
+            - ubuntu-26.04-arm-64:
+                image: snapd-spread/ubuntu-26.04-arm-64
 
     testflinger:
         wait-timeout: 30m
