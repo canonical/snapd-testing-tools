@@ -15,6 +15,7 @@ backends:
             - ubuntu-18.04-64:
             - ubuntu-20.04-64:
                 image: ubuntu-2004-64
+                storage: 16G
             - ubuntu-22.04-64:
                 image: ubuntu-2204-64
             - ubuntu-24.04-64:
