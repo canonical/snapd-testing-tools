@@ -1,7 +1,7 @@
 summary: this is the summary
 
 skip: 
-    - if: false
+    - if: "false"
       reason: not skipping
     - if: |
         ![ -z "something" ]
