@@ -48,3 +48,7 @@ execute: |
     cp "$PWD/tasks/task4" "$PWD/tasks/task.yaml"
     spread-shellcheck "$PROJECT_PATH/tests" "$PWD/tasks/task.yaml" -e "$PWD/tasks"
     rm "$PWD/tasks/task.yaml"
+
+    cp "$PWD/tasks/task5" "$PWD/tasks/task.yaml"
+    spread-shellcheck "$PWD/tasks" 2>&1 | MATCH "SC1035"
+    rm "$PWD/tasks/task.yaml"
