@@ -6,7 +6,7 @@ details: |
 
 backends: [openstack]
 
-systems: [ ubuntu-20.04-64 ]
+systems: [ubuntu-22.04-64]
 
 prepare: |
     apt install -y python3-yamlordereddictloader

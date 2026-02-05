@@ -6,7 +6,7 @@ details: |
 
 backends: [openstack]
 
-systems: [ ubuntu-20.04-64 ]
+systems: [ubuntu-22.04-64]
 
 prepare: |
     wget -qO- wget https://storage.googleapis.com/snapd-spread-tests/spread/spread-amd64.tar.gz | tar xvz

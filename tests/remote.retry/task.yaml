@@ -7,8 +7,7 @@ details: |
 
 backends: [openstack]
 
-# Amazon linux is skipped because no sshpass available
-systems: [-amazon-linux-*]
+systems: [ubuntu-22.04-64]
 
 prepare: |
     tests.pkgs install sshpass

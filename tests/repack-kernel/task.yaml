@@ -8,7 +8,7 @@ details: |
 backends: [openstack]
 
 # ubuntu-core-initramfs seems to be only available on ubuntu-20.04
-systems: [ubuntu-20.04-64]
+systems: [ubuntu-22.04-64]
 
 execute: |
     repack-kernel | MATCH 'usage: repack-kernel <command> <opts>'
