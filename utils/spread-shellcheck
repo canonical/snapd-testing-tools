@@ -184,7 +184,7 @@ def checksection(data, env: Dict[str, str]):
             script_data.append(
                 "# shellcheck disable={}".format(",".join(export_disabled_warnings))
             )
-        script_data.append("export {}".format(key, value))
+        script_data.append("export {}".format(key))
     script_data.append(data)
     proc = subprocess.Popen(
         "shellcheck -s {} -x -".format(SHELLCHECK_SHELL),
