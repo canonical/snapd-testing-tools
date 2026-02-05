@@ -143,7 +143,7 @@ suites:
         summary: Main test suite for snapd-testing-tools project
         prepare: |
             # setup snapd proxy if needed
-            if [ "${SNAPD_USE_PROXY:-}" = true ] && [ -e /etc/systemd/system/snapd.service ]; then
+            if [ "${SNAPD_USE_PROXY:-}" = true ] && [ -n "$(command -v snap)" ]; then
                 mkdir -p /etc/systemd/system/snapd.service.d
                 PROXY_CONF=/etc/systemd/system/snapd.service.d/proxy.conf
                 {
