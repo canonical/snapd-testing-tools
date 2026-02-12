@@ -123,7 +123,7 @@ wait_for_reboot() {
     done
 
     echo ""
-    if [ "$last_boot_id" != "$initial_boot_id" ]; then
+    if [[ "$last_boot_id" =~ .*-.*-.*-.*-.* ]] && [ "$last_boot_id" != "$initial_boot_id" ]; then
         echo "remote.wait-for: reboot completed"
     else
         echo "remote.wait-for: boot id did not change"
