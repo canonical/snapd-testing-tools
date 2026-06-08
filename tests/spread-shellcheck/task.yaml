@@ -6,9 +6,9 @@ details: |
     tool can run in a directory tree and skips checks when
     it finds "shellcheck disable".
 
-backends: [google]
+backends: [openstack]
 
-systems: [ ubuntu-20.04-64 ]
+systems: [ubuntu-22.04-64]
 
 prepare: |
     snap install shellcheck
