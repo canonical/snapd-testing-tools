@@ -4,7 +4,7 @@ details: |
     Check the os.query tool properly detects the current system. Also
     verify the version comparison works.
 
-backends: [google, openstack]
+backends: [openstack*]
 
 execute: |
     os.query --help | MATCH 'usage: os.query is-core, is-classic'

@@ -5,46 +5,6 @@ environment:
     PATH: $PROJECT_PATH/tools:$PROJECT_PATH/utils:$PROJECT_PATH/remote:$PATH
     
 backends:
-    google:
-        key: '$(HOST: echo "$SPREAD_GOOGLE_KEY")'
-        location: snapd-spread/us-east1-b
-        halt-timeout: 2h
-        systems:
-            - ubuntu-14.04-64:
-            - ubuntu-16.04-64:
-            - ubuntu-18.04-64:
-            - ubuntu-20.04-64:
-                image: ubuntu-2004-64
-                storage: 16G
-            - ubuntu-22.04-64:
-                image: ubuntu-2204-64
-            - ubuntu-24.04-64:
-                image: ubuntu-2404-64
-            - debian-11-64:
-            - debian-12-64:
-            - debian-sid-64:
-            - arch-linux-64:
-            - amazon-linux-2-64:
-                storage: preserve-size
-            - amazon-linux-2023-64:
-                storage: preserve-size
-            - centos-9-64:
-                storage: preserve-size
-            - opensuse-15.5-64:
-            - opensuse-15.6-64:
-
-    google-nested:
-        type: google
-        key: '$(HOST: echo "$SPREAD_GOOGLE_KEY")'
-        location: snapd-spread/us-east1-b
-        plan: n2-standard-2
-        halt-timeout: 2h
-        cpu-family: "Intel Cascade Lake"
-        systems:
-            - ubuntu-20.04-64:
-                  image: ubuntu-2004-64-virt-enabled
-                  storage: 20G
-
     openstack:
         key: '$(HOST: echo "$OS_CREDENTIALS_AMD64_PS7")'
         plan: shared.xsmall
@@ -84,6 +44,41 @@ backends:
                 image: snapd-spread/centos-9-64
             - debian-sid-64:
                 image: snapd-spread/debian-sid-64
+
+    openstack-ext:
+        type: openstack
+        key: '$(HOST: echo "$OS_CREDENTIALS_AMD64_PS7")'
+        plan: shared.medium
+        storage: 30G
+        halt-timeout: 2h
+        wait-timeout: 10m
+        groups: [default]
+        environment: *openstack-env
+        systems: &openstack-nested-systems
+            - ubuntu-16.04-64:
+                  image: snapd-spread/ubuntu-16.04-64
+                  storage: 20G
+                  workers: 4
+            - ubuntu-18.04-64:
+                  image: snapd-spread/ubuntu-18.04-64
+                  storage: 20G
+                  workers: 4
+            - ubuntu-20.04-64:
+                  image: snapd-spread/ubuntu-20.04-64-hwe
+                  storage: 20G
+                  workers: 12
+            - ubuntu-22.04-64:
+                  image: snapd-spread/ubuntu-22.04-64
+                  storage: 25G
+                  workers: 12
+            - ubuntu-24.04-64:
+                  image: snapd-spread/ubuntu-24.04-64
+                  storage: 30G
+                  workers: 12
+            - ubuntu-26.04-64:
+                  image: snapd-spread/ubuntu-26.04-64
+                  storage: 30G
+                  workers: 12
 
     openstack-dev:
         type: openstack
