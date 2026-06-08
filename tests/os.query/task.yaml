@@ -252,15 +252,9 @@ execute: |
             os.query is-centos
             ! os.query is-core
             ;;
-        opensuse-15.5-64)
+        opensuse-16.0-64)
             os.query is-opensuse
-            os.query is-opensuse 15.5
-            os.query is-classic
-            ! os.query is-core
-            ;;
-        opensuse-15.6-64)
-            os.query is-opensuse
-            os.query is-opensuse 15.6
+            os.query is-opensuse 16.0
             os.query is-classic
             ! os.query is-core
             ;;
