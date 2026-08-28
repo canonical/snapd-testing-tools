@@ -5,7 +5,7 @@ details: |
     information required to allow connecting to the remote
     instance through ssh.
 
-backends: [google]
+backends: [openstack]
 
 restore: |
     rm -f remote.setup.cfg my-key my-key-2

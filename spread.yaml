@@ -5,45 +5,6 @@ environment:
     PATH: $PROJECT_PATH/tools:$PROJECT_PATH/utils:$PROJECT_PATH/remote:$PATH
     
 backends:
-    google:
-        key: '$(HOST: echo "$SPREAD_GOOGLE_KEY")'
-        location: snapd-spread/us-east1-b
-        halt-timeout: 2h
-        systems:
-            - ubuntu-14.04-64:
-            - ubuntu-16.04-64:
-            - ubuntu-18.04-64:
-            - ubuntu-20.04-64:
-                image: ubuntu-2004-64
-            - ubuntu-22.04-64:
-                image: ubuntu-2204-64
-            - ubuntu-24.04-64:
-                image: ubuntu-2404-64
-            - debian-11-64:
-            - debian-12-64:
-            - debian-sid-64:
-            - arch-linux-64:
-            - amazon-linux-2-64:
-                storage: preserve-size
-            - amazon-linux-2023-64:
-                storage: preserve-size
-            - centos-9-64:
-                storage: preserve-size
-            - opensuse-15.5-64:
-            - opensuse-15.6-64:
-
-    google-nested:
-        type: google
-        key: '$(HOST: echo "$SPREAD_GOOGLE_KEY")'
-        location: snapd-spread/us-east1-b
-        plan: n2-standard-2
-        halt-timeout: 2h
-        cpu-family: "Intel Cascade Lake"
-        systems:
-            - ubuntu-20.04-64:
-                  image: ubuntu-2004-64-virt-enabled
-                  storage: 20G
-
     openstack:
         key: '$(HOST: echo "$OS_CREDENTIALS_AMD64_PS7")'
         plan: shared.xsmall
