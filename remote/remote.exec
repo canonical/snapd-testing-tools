@@ -34,6 +34,24 @@ _get_cert() {
     fi
 }
 
+_get_control_path() {
+    local control_dir control_path
+    control_dir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/snapd-testing-tools-$UID"
+    mkdir -p "$control_dir"
+    chmod 700 "$control_dir"
+    control_path="$control_dir/remote-exec-%C"
+    # shellcheck disable=SC2153
+    ssh -G -p "$TESTS_REMOTE_PORT" -o ControlPath="$control_path" "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" 2>/dev/null | awk '$1 == "controlpath" { print $2; exit }'
+}
+
+_ssh_exec() {
+    local timeout="$1"
+    shift
+
+    # shellcheck disable=SC2153,SC2086
+    $SSH_PASS ssh $SSH_CERT -p "$TESTS_REMOTE_PORT" -o LogLevel=ERROR -o ServerAliveInterval=10 -o ConnectTimeout="$timeout" -o ControlMaster=auto -o ControlPersist=10m -o ControlPath="$SSH_CONTROL_PATH" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
+}
+
 remote_exec() {
     local user pass
     local timeout=10
@@ -73,12 +91,19 @@ remote_exec() {
         TESTS_REMOTE_PASS="$pass"
     fi
 
-    local SSH_PASS SSH_CERT
+    local SSH_PASS SSH_CERT SSH_CONTROL_PATH
     SSH_PASS="$(_get_pass)"
     SSH_CERT="$(_get_cert)"
+    SSH_CONTROL_PATH="$(_get_control_path)"
 
-    # shellcheck disable=SC2153,SC2086
-    $SSH_PASS ssh $SSH_CERT -p "$TESTS_REMOTE_PORT" -o LogLevel=ERROR -o ServerAliveInterval=10 -o ConnectTimeout="$timeout" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
+    local ssh_status=0
+    _ssh_exec "$timeout" "$@" || ssh_status=$?
+    if [ "$ssh_status" -ne 255 ]; then
+        return "$ssh_status"
+    fi
+
+    rm -f "$SSH_CONTROL_PATH"
+    _ssh_exec "$timeout" "$@"
 }
 
 main() {    
