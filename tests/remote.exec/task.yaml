@@ -32,10 +32,19 @@ execute: |
     remote.exec "true"
     test "$(stat -c %i "$control_socket")" = "$control_socket_inode"
 
+    control_socket_count="$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*' | wc -l)"
+    remote.setup config --host 127.0.0.1 --port 22 --user tools-user-1 --pass tools-user-1
+    remote.exec "true"
+    test "$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*' | wc -l)" -eq "$((control_socket_count + 1))"
+    remote.setup config --host localhost --port 22 --user tools-user-1 --pass tools-user-1
+
     control_master_pid="$(ssh -S "$control_socket" -O check tools-user-1@localhost 2>&1 | sed -n 's/.*pid=\([0-9]*\).*/\1/p')"
     kill -9 "$control_master_pid"
     remote.exec "true"
     test -S "$control_socket"
+
+    not remote.exec 'echo executed >> command-runs; exit 255'
+    test "$(remote.exec 'wc -l < command-runs')" -eq 1
 
     remote.exec --user tools-user-2 --pass tools-user-2 "touch testfile"
     test -f /home/tools-user-2/testfile
