@@ -14,10 +14,10 @@ prepare: |
 
 restore: |
     tests.pkgs remove sshpass
-    rm -rf remote.setup.cfg remote-runtime my-key my-key.pub  /home/tools-user-1/*  /home/tools-user-2/*
+    rm -rf remote.setup.cfg /tmp/remote-exec-test my-key my-key.pub  /home/tools-user-1/*  /home/tools-user-2/*
 
 execute: |
-    export XDG_RUNTIME_DIR="$PWD/remote-runtime"
+    export TESTS_REMOTE_CONTROL_DIR=/tmp/remote-exec-test
 
     remote.exec --help | MATCH 'usage: remote.exec \[--user <USER>\] \[--pass <PASS>\] <CMD>'
     remote.exec -h | MATCH 'usage: remote.exec \[--user <USER>\] \[--pass <PASS>\] <CMD>'    
@@ -25,7 +25,7 @@ execute: |
     remote.exec "touch testfile"
     test -f /home/tools-user-1/testfile
 
-    control_socket="$(find "${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/snapd-testing-tools-$UID" -type s -name 'remote-exec-*')"
+    control_socket="$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*')"
     test -S "$control_socket"
     control_socket_inode="$(stat -c %i "$control_socket")"
     remote.exec "true"

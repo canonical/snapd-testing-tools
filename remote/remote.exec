@@ -36,7 +36,7 @@ _get_cert() {
 
 _get_control_path() {
     local control_dir control_path
-    control_dir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/snapd-testing-tools-$UID"
+    control_dir="${TESTS_REMOTE_CONTROL_DIR:-/tmp/remote-exec-$UID}"
     mkdir -p "$control_dir"
     chmod 700 "$control_dir"
     control_path="$control_dir/remote-exec-%C"
