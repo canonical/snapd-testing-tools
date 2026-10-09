@@ -26,20 +26,39 @@ _get_pass() {
     fi
 }
 
-_get_cert() {
+_get_key() {
     if [ -n "$TESTS_REMOTE_PASS" ]; then
         return
-    elif [ -n "$TESTS_REMOTE_CERT" ]; then
-        echo "-i $TESTS_REMOTE_CERT"
+    elif [ -n "$TESTS_REMOTE_KEY" ]; then
+        echo "-i $TESTS_REMOTE_KEY"
+    fi
+}
+
+_get_auth_id() {
+    local control_dir="$1"
+    local salt_file="$control_dir/auth-salt"
+
+    if [ ! -f "$salt_file" ]; then
+        (umask 077 && head -c 32 /dev/urandom > "$salt_file")
+    fi
+
+    if [ -n "$TESTS_REMOTE_PASS" ]; then
+        { cat "$salt_file"; printf '\0password\0%s' "$TESTS_REMOTE_PASS"; } | sha256sum | cut -c 1-16
+    elif [ -n "$TESTS_REMOTE_KEY" ]; then
+        { cat "$salt_file"; printf '\0key\0'; cat "$TESTS_REMOTE_KEY"; } | sha256sum | cut -c 1-16
+    else
+        { cat "$salt_file"; printf '\0default\0%s' "${SSH_AUTH_SOCK:-}"; } | sha256sum | cut -c 1-16
     fi
 }
 
 _get_control_path() {
-    local control_dir control_path
+    local auth_id control_dir control_path
     control_dir="${TESTS_REMOTE_CONTROL_DIR:-/tmp/remote-exec-$UID}"
     mkdir -p "$control_dir"
     chmod 700 "$control_dir"
-    control_path="$control_dir/remote-exec-%C"
+    auth_id="$(_get_auth_id "$control_dir")"
+    control_path="$control_dir/remote-exec-%C-$auth_id"
+    # Resolve %C locally without establishing an SSH connection.
     # shellcheck disable=SC2153
     ssh -G -p "$TESTS_REMOTE_PORT" -o ControlPath="$control_path" "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" 2>/dev/null | awk '$1 == "controlpath" { print $2; exit }'
 }
@@ -49,7 +68,7 @@ _ssh_exec() {
     shift
 
     # shellcheck disable=SC2153,SC2086
-    $SSH_PASS ssh $SSH_CERT -p "$TESTS_REMOTE_PORT" -o LogLevel=ERROR -o ServerAliveInterval=10 -o ConnectTimeout="$timeout" -o ControlMaster=auto -o ControlPersist=10m -o ControlPath="$SSH_CONTROL_PATH" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
+    $SSH_PASS ssh $SSH_KEY -p "$TESTS_REMOTE_PORT" -o LogLevel=ERROR -o ServerAliveInterval=10 -o ConnectTimeout="$timeout" -o ControlMaster=auto -o ControlPersist=10m -o ControlPath="$SSH_CONTROL_PATH" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" "$@"
 }
 
 remote_exec() {
@@ -91,9 +110,9 @@ remote_exec() {
         TESTS_REMOTE_PASS="$pass"
     fi
 
-    local SSH_PASS SSH_CERT SSH_CONTROL_PATH
+    local SSH_PASS SSH_KEY SSH_CONTROL_PATH
     SSH_PASS="$(_get_pass)"
-    SSH_CERT="$(_get_cert)"
+    SSH_KEY="$(_get_key)"
     SSH_CONTROL_PATH="$(_get_control_path)"
 
     local ssh_status=0
