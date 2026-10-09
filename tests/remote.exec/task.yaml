@@ -27,6 +27,7 @@ execute: |
 
     control_socket="$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*')"
     test -S "$control_socket"
+    test "${#control_socket}" -le 80
     control_socket_inode="$(stat -c %i "$control_socket")"
     remote.exec "true"
     test "$(stat -c %i "$control_socket")" = "$control_socket_inode"

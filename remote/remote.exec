@@ -52,15 +52,16 @@ _get_auth_id() {
 }
 
 _get_control_path() {
-    local auth_id control_dir control_path
+    local auth_id control_dir endpoint_id
     control_dir="${TESTS_REMOTE_CONTROL_DIR:-/tmp/remote-exec-$UID}"
     mkdir -p "$control_dir"
     chmod 700 "$control_dir"
     auth_id="$(_get_auth_id "$control_dir")"
-    control_path="$control_dir/remote-exec-%C-$auth_id"
-    # Resolve %C locally without establishing an SSH connection.
+    # Resolve %C locally without establishing an SSH connection, then shorten it
+    # to leave room for OpenSSH's temporary listener suffix.
     # shellcheck disable=SC2153
-    ssh -G -p "$TESTS_REMOTE_PORT" -o ControlPath="$control_path" "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" 2>/dev/null | awk '$1 == "controlpath" { print $2; exit }'
+    endpoint_id="$(ssh -G -p "$TESTS_REMOTE_PORT" -o ControlPath=%C "$TESTS_REMOTE_USER"@"$TESTS_REMOTE_HOST" 2>/dev/null | awk '$1 == "controlpath" { print substr($2, 1, 16); exit }')"
+    echo "$control_dir/remote-exec-$endpoint_id-$auth_id"
 }
 
 _ssh_exec() {
