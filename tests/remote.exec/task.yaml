@@ -56,13 +56,16 @@ execute: |
     ssh-keygen -t rsa -N "" -f my-key
     chmod 0600 my-key my-key.pub
 
-    mkdir -p /home/tools-user-1/.ssh
+    mkdir -p /home/tools-user-1/.ssh /home/tools-user-2/.ssh
     cat my-key.pub > /home/tools-user-1/.ssh/authorized_keys
+    cat my-key.pub > /home/tools-user-2/.ssh/authorized_keys
     
     control_socket_count="$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*' | wc -l)"
     remote.setup config --host localhost --port 22 --user tools-user-1 --key my-key
     remote.exec "ls /home/tools-user-1/testfile" | MATCH testfile
     test "$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*' | wc -l)" -eq "$((control_socket_count + 1))"
+    test "$(remote.exec --user tools-user-2 whoami)" = tools-user-2
+    test "$(find "$TESTS_REMOTE_CONTROL_DIR" -type s -name 'remote-exec-*' | wc -l)" -eq "$((control_socket_count + 2))"
 
     # Check error when there is no configuration
     rm -f remote.setup.cfg
