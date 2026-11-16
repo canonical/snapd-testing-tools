@@ -124,26 +124,7 @@ backends:
         environment: *openstack-env
         systems: *openstack-arm-systems
 
-
-    testflinger:
-        wait-timeout: 30m
-        kill-timeout: 40m
         halt-timeout: 2h
-        systems:
-            - ubuntu-core-24-arm-64-rpi4:
-                  queue: rpi4b
-                  image: https://cdimage.ubuntu.com/ubuntu-core/24/dangerous-stable/current/ubuntu-core-24-arm64+raspi.img.xz
-                  username: ubuntu
-                  password: ubuntu
-            - ubuntu-core-20-murcia:
-                queue: murcia-3200
-                image: core20-latest-stable
-                username: ubuntu
-                reserve-key: lp:sergio-j-cazzolato
-                ssh-rsa-key: '$(HOST: echo "$SPREAD_SSH_KEY")'
-                ssh-key-pass: '$(HOST: echo "$SPREAD_SSH_KEY_PASS")'
-
-
 path: /root/snapd-testing-tools
 
 kill-timeout: 10m
