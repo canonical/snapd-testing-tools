@@ -124,7 +124,6 @@ backends:
         environment: *openstack-env
         systems: *openstack-arm-systems
 
-        halt-timeout: 2h
 path: /root/snapd-testing-tools
 
 kill-timeout: 10m
